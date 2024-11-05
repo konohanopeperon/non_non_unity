@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>プロフィール作成</title>
+   <style>
+       body {
+           font-family: Arial, sans-serif;
+           margin: 20px;
+       }
+       nav {
+           margin-bottom: 20px;
+       }
+       nav a {
+           margin-right: 15px;
+           text-decoration: none;
+           color: #333;
+       }
+       form {
+           max-width: 600px;
+           margin: 0 auto;
+       }
+       label {
+           display: block;
+           margin-bottom: 8px;
+           font-weight: bold;
+       }
+       input, textarea {
+           width: 100%;
+           padding: 10px;
+           margin-bottom: 15px;
+           border: 1px solid #ccc;
+           border-radius: 4px;
+       }
+       button {
+           padding: 10px 25px;
+           background-color: #4CAF50;
+           color: white;
+           border: none;
+           border-radius: 4px;
+           cursor: pointer;
+       }
+       button:hover {
+           background-color: #45a049;
+       }
+   </style>
+</head>
+<body>
+
+
+   <nav>
+       <a href="create_profile.html">プロフィール作成</a>
+       <a href="profile_edit.html">プロフィール編集</a>
+       <a href="profile_list.html">プロフィール一覧</a>
+       <a href="search_accounts.html">アカウント検索</a>
+   </nav>
+
+
+   <h1>プロフィールを作成する</h1>
+   <form method="POST">
+       <label for="nickname">ニックネーム</label>
+       <input type="text" id="nickname" name="nickname" required>
+
+
+       <label><input type="radio" name="sex" value="1" required> 男</label>
+       <label><input type="radio" name="sex" value="2"> 女</label>
+       <label><input type="radio" name="sex" value="3"> なし</label>
+
+
+       <label for="bio">自己紹介</label>
+       <textarea id="bio" name="bio" rows="5" required></textarea>
+
+
+       <label for="hobby">趣味</label>
+       <textarea id="hobby" name="hobby" rows="2" required></textarea>
+
+
+       <button type="submit">プロフィールを作成</button>
+   </form>
+</body>
+</html>

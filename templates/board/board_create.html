@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+   <meta charset="UTF-8">
+   <title>掲示板作成</title>
+</head>
+<body>
+   <h1>掲示板を作成</h1>
+   <form action="{% url 'board_create' %}" method="post">
+       {% csrf_token %}
+       <label for="title">タイトル:</label>
+       <input type="text" id="title" name="title" required><br><br>
+
+       <label for="participants">参加人数</label>
+       <input type="number" id="participants" name="participants" required><br><br>
+
+       <label for="description">説明:</label>
+       <textarea id="description" name="description" rows="4" required></textarea><br><br>
+       
+
+
+       <button type="submit">掲示板を作成</button>
+   </form>
+</body>
+</html>

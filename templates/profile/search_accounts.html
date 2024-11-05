@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>プロフィール一覧</title>
+   <style>
+       body {
+           font-family: Arial, sans-serif;
+           margin: 20px;
+       }
+       nav {
+           margin-bottom: 20px;
+       }
+       nav a {
+           margin-right: 15px;
+           text-decoration: none;
+           color: #333;
+       }
+       table {
+           width: 100%;
+           border-collapse: collapse;
+           margin-bottom: 20px;
+       }
+       th, td {
+           border: 1px solid #ddd;
+           padding: 12px;
+           text-align: left;
+       }
+       th {
+           background-color: #f2f2f2;
+       }
+       a.view-profile {
+           color: #2196F3;
+           text-decoration: none;
+       }
+       a.view-profile:hover {
+           text-decoration: underline;
+       }
+   </style>
+</head>
+<body>
+
+
+   <nav>
+       <a href="create_profile.html">プロフィール作成</a>
+       <a href="profile_edit.html">プロフィール編集</a>
+       <a href="profile_list.html">プロフィール一覧</a>
+       <a href="search_accounts.html">アカウント検索</a>
+   </nav>
+
+
+   <h1>プロフィール一覧</h1>
+   <table>
+       <thead>
+           <tr>
+               <th>ユーザー名</th>
+               <th>メールアドレス</th>
+               <th>アクション</th>
+           </tr>
+       </thead>
+       <tbody>
+           <tr>
+               <td>ユーザー1</td>
+               <td>user1@example.com</td>
+               <td><a href="view_profile.html?user_id=1" class="view-profile">プロフィールを見る</a></td>
+           </tr>
+           <tr>
+               <td>ユーザー2</td>
+               <td>user2@example.com</td>
+               <td><a href="view_profile.html?user_id=2" class="view-profile">プロフィールを見る</a></td>
+           </tr>
+           <!-- 追加のユーザー行 -->
+       </tbody>
+   </table>
+
+
+</body>
+</html>

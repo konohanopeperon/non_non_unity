@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>プロフィール編集</title>
+   <style>
+       body {
+           font-family: Arial, sans-serif;
+           margin: 20px;
+       }
+       nav {
+           margin-bottom: 20px;
+       }
+       nav a {
+           margin-right: 15px;
+           text-decoration: none;
+           color: #333;
+       }
+       form {
+           max-width: 600px;
+           margin: 0 auto;
+       }
+       label {
+           display: block;
+           margin-bottom: 8px;
+           font-weight: bold;
+       }
+       input, textarea {
+           width: 100%;
+           padding: 10px;
+           margin-bottom: 15px;
+           border: 1px solid #ccc;
+           border-radius: 4px;
+       }
+       button {
+           padding: 10px 25px;
+           background-color: #2196F3;
+           color: white;
+           border: none;
+           border-radius: 4px;
+           cursor: pointer;
+       }
+       button:hover {
+           background-color: #0b7dda;
+       }
+   </style>
+</head>
+<body>
+
+
+   <nav>
+       <a href="create_profile.html">プロフィール作成</a>
+       <a href="profile_edit.html">プロフィール編集</a>
+       <a href="profile_list.html">プロフィール一覧</a>
+       <a href="search_accounts.html">アカウント検索</a>
+   </nav>
+
+
+   <h1>プロフィールを編集する</h1>
+   <form action="/edit_profile" method="POST">
+       <label for="username">ユーザー名</label>
+       <input type="text" id="username" name="username" value="現在のユーザー名" required>
+
+
+       <label for="email">メールアドレス</label>
+       <input type="email" id="email" name="email" value="current@example.com" required>
+
+
+       <label for="bio">自己紹介</label>
+       <textarea id="bio" name="bio" rows="5" required>現在の自己紹介内容</textarea>
+
+
+       <button type="submit">プロフィールを更新</button>
+   </form>
+
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html>
+<head>
+   <title>ログイン</title>
+</head>
+<body>
+<h2>ログイン</h2>
+{% if messages %}
+   {% for message in messages %}
+       <div>{{ message }}</div>
+   {% endfor %}
+{% endif %}
+<form method="POST">
+   {% csrf_token %}
+   <label for="userid">ユーザID:</label>
+   <input type="text" name="userid" id="userid" required><br>
+   <label for="password">パスワード:</label>
+   <input type="password" name="password" id="password" required><br>
+   <button type="submit">ログイン</button>
+</form>
+</body>
+</html>
