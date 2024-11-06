@@ -7,24 +7,25 @@
 </head>
 <body>
     <h1>掲示板一覧</h1>
+    <form method="GET" action="{% url 'board_kensaku' %}">
+        <input type="text" name="query" placeholder="検索欄">
+        <button type="submit">検索</button>
+    </form>
     <table border="1">
         <tr>
             <th>タイトル</th>
             <th>作成者</th>
             <th>参加人数</th>
             <th>作成日時</th>
-            <th></th>
         </tr>
         {% for board in boards %}
         <tr>
-            <td>{{ board.title }}</td>
-            <td>{{ board.creator.username }}</td>
-            <td>{{ board.participants }}</td>
-            <td>{{ board.created_at|date:"Y-m-d" }}</td>
             <td>
-                <form method="GET" action="{% url 'board_description' board.board_id %}"></form>
-                <button type="submit">詳細を見る</button>
+                <a href="{% url 'board_description' board.board_id %}">{{ board.title }}</a>
             </td>
+            <td>{{ board.creator.username }}</td>
+            <td>{{ board.participant_limit }}</td>
+            <td>{{ board.created_at|date:"Y-m-d" }}</td>
         </tr>
         {% empty %}
         <tr>

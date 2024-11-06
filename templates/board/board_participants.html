@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- board_detail.html -->
+<h1>{{ board.title }}</h1>
+<p>{{ board.description }}</p>
+<p>{{ board.creator.username }}の掲示板</p>
+<p>参加可能人数: {{ board.participants }}/{{ board.participant_limit }}</p>
+
+{% if board.participants >= board.participant_limit %}
+    <p>This board has reached the participant limit.</p>
+{% else %}
+    <a href="{% url 'join_board' board.board_id %}">Join this board</a>
+{% endif %}
+
+<h2>参加希望者:</h2>
+<ul>
+    {% for participant in board.participants_list.all %}
+        <li>{{ participant.username }}</li>
+    {% endfor %}
+</ul>
+
+</body>
+</html>

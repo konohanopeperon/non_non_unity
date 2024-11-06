@@ -5,7 +5,12 @@
     <title>{{ board.title }}</title>
 </head>
 <body>
-<h1>{{ board.title }}</h1>
-
+<h2>{{ board.title }}</h2>
+{{ board.description }}
+参加可能人数{{ board.participant_limit }}人
+<form method="POST" action="{% url 'board_sanka' board.board_id %}">
+    {% csrf_token %}
+    <button type="submit">参加する</button>
+</form>
 </body>
 </html>

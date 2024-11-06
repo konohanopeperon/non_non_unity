@@ -2,11 +2,13 @@ import random
 from contextlib import nullcontext
 
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
 
-from fuccer.models import User, BoardModel, Profile
+from fuccer.models import User, BoardModel, Profile, BoardParticipant
+
 
 def login(request):
    if request.method == 'POST':
@@ -41,11 +43,15 @@ def logout(request):
    logout(request)
    return render(request, 'login.html')
 
+def board_kensaku(request):
+    query = request.GET.get('query')
+    if query:
+        board = BoardModel.objects.objects.filter
 
 def create_board(request):
     if request.method == "POST":
         title = request.POST.get('title')
-        participants = request.POST.get('participants')
+        participant_limit = request.POST.get('participant_limit')
         description = request.POST.get('description')
         creator_id = request.session.get('userid')  # 現在ログイン中のユーザーを取得
 
@@ -56,10 +62,10 @@ def create_board(request):
         # BoardModelのインスタンスを作成して保存
         board = BoardModel(
             title=title,
-            participants=participants,
+            participant_limit=participant_limit,
             description=description,
             creator_id=creator_id,
-            created_at=timezone.now()
+            created_at=timezone.now(),
         )
         board.save()
 
@@ -69,10 +75,29 @@ def create_board(request):
 
     return render(request, 'board/board_create.html')
 
-def board_description(request):
-    if request.method == "GET":
-        board = BoardModel.objects.get(board_id=request.GET)
+def board_description(request, board_id):
+        board = BoardModel.objects.get(board_id=board_id)
         return render(request, 'board/board_description.html', {'board':board})
+
+def board_sanka(request, board_id):
+    board = get_object_or_404(BoardModel, board_id=board_id)
+    user = User.objects.get(userid=request.session.get('userid'))
+
+    # 既に参加しているか確認
+    if BoardParticipant.objects.filter(board=board, user=user).exists():
+        return HttpResponse("You have already joined this board.")
+
+    # 参加上限のチェック
+    if board.participants >= board.participant_limit:
+        return HttpResponse("This board has reached the participant limit.")
+
+    # 参加登録処理
+    BoardParticipant.objects.create(board=board, user=user)
+    board.participants += 1
+    board.save()
+
+    boards = BoardModel.objects.all()
+    return render(request, 'board/board_list.html', {'boards': boards})
 
 
 def create_profile(request):
