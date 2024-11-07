@@ -2,13 +2,31 @@ import random
 from contextlib import nullcontext
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-
-
 from fuccer.models import User, BoardModel, Profile, BoardParticipant
 
+@login_required
+def home(request):
+    # ユーザ名取得
+    print(f"Current user: {request.user.username}")
+    # 全ユーザ情報取得
+    for attr in dir(request.user):
+        try:
+            print(f"{attr}: {getattr(request.user, attr)}")
+        except AttributeError:
+            print(f"{attr}: [アクセス不可]")
+    # HTML
+    return render(request, 'home.html')
+
+
+@login_required
+def test_page(request):
+    # ユーザ名取得
+    print(f"Current user: {request.user.username}")
+    return render(request, 'test_page.html')
 
 def login(request):
    if request.method == 'POST':
@@ -21,16 +39,16 @@ def login(request):
                user = User.objects.get(userid=userid)
            except User.DoesNotExist:
                messages.error(request, "ユーザIDもしくはパスワードが違います")
-               return render(request, 'login.html')
+               return render(request, 'registration/login.html')
            if user.password == password:
                request.session['userid'] = user.userid
            else:
                messages.error(request, 'ユーザIDもしくはパスワードが違います')
-               return render(request, 'login.html')
+               return render(request, 'registration/login.html')
            boards = BoardModel.objects.all()
            return render(request, 'board/board_list.html', {'boards': boards})
-       return render(request, 'login.html')
-   return render(request, 'login.html')
+       return render(request, 'registration/login.html')
+   return render(request, 'registration/login.html')
 
 def board_list(request):
     # BoardModelテーブルの全レコードを取得
@@ -41,7 +59,7 @@ def board_list(request):
 
 def logout(request):
    logout(request)
-   return render(request, 'login.html')
+   return render(request, 'registration/login.html')
 
 def board_kensaku(request):
     query = request.GET.get('query')

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if user.is_authenticated %}
+  <h1>ログイン成功！！</h1>
+  <h2>{{ user.username }}がログイン中</h2>
+  <p>is_authenticated : {{ user.is_authenticated }}</p>
+  <p>user_name : {{ user.username }}</p>
+  <p>backends: {{ backends }}</p>
+{% endif %}
+
+{% endblock %}
