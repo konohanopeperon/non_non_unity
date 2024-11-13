@@ -6,7 +6,8 @@
     <title>掲示板一覧</title>
 </head>
 <body>
-    <h1>掲示板一覧</h1>
+    <h1></h1>
+    <h2>掲示板一覧</h2>
     <form method="GET" action="{% url 'board_kensaku' %}">
         <input type="text" name="query" placeholder="検索欄">
         <button type="submit">検索</button>
@@ -23,7 +24,7 @@
             <td>
                 <a href="{% url 'board_description' board.board_id %}">{{ board.title }}</a>
             </td>
-            <td>{{ board.creator.username }}</td>
+            <td>{{ board.creator.last_name }}{{ board.creator.first_name }}</td>
             <td>{{ board.participant_limit }}</td>
             <td>{{ board.created_at|date:"Y-m-d" }}</td>
         </tr>

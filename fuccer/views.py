@@ -12,14 +12,20 @@ from fuccer.models import User, BoardModel, Profile, BoardParticipant
 def home(request):
     # ユーザ名取得
     print(f"Current user: {request.user.username}")
+    request.session['id'] = f'{request.user.id}'
     # 全ユーザ情報取得
     for attr in dir(request.user):
         try:
             print(f"{attr}: {getattr(request.user, attr)}")
         except AttributeError:
             print(f"{attr}: [アクセス不可]")
-    # HTML
-    return render(request, 'home.html')
+
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+        return render(request, 'profile/profile_create.html')
+    boards = BoardModel.objects.all()
+    return render(request, 'board/board_list.html', {'boards': boards, 'profile':profile})
 
 
 @login_required
@@ -27,28 +33,6 @@ def test_page(request):
     # ユーザ名取得
     print(f"Current user: {request.user.username}")
     return render(request, 'test_page.html')
-
-def login(request):
-   if request.method == 'POST':
-       userid = request.POST.get('userid')
-       password = request.POST.get('password')
-       if not userid or not password:
-           messages.error(request, '空欄があります')
-       else:
-           try:
-               user = User.objects.get(userid=userid)
-           except User.DoesNotExist:
-               messages.error(request, "ユーザIDもしくはパスワードが違います")
-               return render(request, 'registration/login.html')
-           if user.password == password:
-               request.session['userid'] = user.userid
-           else:
-               messages.error(request, 'ユーザIDもしくはパスワードが違います')
-               return render(request, 'registration/login.html')
-           boards = BoardModel.objects.all()
-           return render(request, 'board/board_list.html', {'boards': boards})
-       return render(request, 'registration/login.html')
-   return render(request, 'registration/login.html')
 
 def board_list(request):
     # BoardModelテーブルの全レコードを取得
@@ -71,8 +55,7 @@ def create_board(request):
         title = request.POST.get('title')
         participant_limit = request.POST.get('participant_limit')
         description = request.POST.get('description')
-        creator_id = request.session.get('userid')  # 現在ログイン中のユーザーを取得
-
+        creator = request.user
         if not title or not description:
             messages.error(request, 'タイトルまたは説明が空です。')
             return render(request, 'board/board_create.html')
@@ -82,7 +65,7 @@ def create_board(request):
             title=title,
             participant_limit=participant_limit,
             description=description,
-            creator_id=creator_id,
+            creator=creator,
             created_at=timezone.now(),
         )
         board.save()
@@ -97,17 +80,24 @@ def board_description(request, board_id):
         board = BoardModel.objects.get(board_id=board_id)
         return render(request, 'board/board_description.html', {'board':board})
 
+
 def board_sanka(request, board_id):
     board = get_object_or_404(BoardModel, board_id=board_id)
-    user = User.objects.get(userid=request.session.get('userid'))
+
+    user = request.user
+
+    # ユーザーに関連するプロフィールがあるかを確認
+    profile = Profile.objects.filter(user=user).first()
+    if not profile:
+        return HttpResponse("参加するには自分のプロフィールを作成する必要があります")
 
     # 既に参加しているか確認
     if BoardParticipant.objects.filter(board=board, user=user).exists():
-        return HttpResponse("You have already joined this board.")
+        return HttpResponse("すでにこの掲示板に参加しています")
 
     # 参加上限のチェック
     if board.participants >= board.participant_limit:
-        return HttpResponse("This board has reached the participant limit.")
+        return HttpResponse("この掲示板はすでに参加可能人数に達しています")
 
     # 参加登録処理
     BoardParticipant.objects.create(board=board, user=user)
@@ -115,8 +105,7 @@ def board_sanka(request, board_id):
     board.save()
 
     boards = BoardModel.objects.all()
-    return render(request, 'board/board_list.html', {'boards': boards})
-
+    return render(request, 'board/board_list.html', {'boards': boards, 'profile': profile})
 
 def create_profile(request):
    if request.method == 'POST':
