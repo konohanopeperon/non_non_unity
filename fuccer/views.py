@@ -1,6 +1,4 @@
-import random
-from contextlib import nullcontext
-
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -47,8 +45,20 @@ def logout(request):
 
 def board_kensaku(request):
     query = request.GET.get('query')
-    if query:
-        board = BoardModel.objects.objects.filter
+    k = request.GET.get('k')
+    if not query:
+        boards = BoardModel.objects.all()
+        return render(request, 'board/board_list.html',{'boards': boards})
+    if not k:
+        messages.error(request, 'タイトルかタグか指定してください')
+        return render(request, 'board/board_list.html')
+    if k == 1:
+        boards = BoardModel.objects.filter(title_iconteins=query)
+        return render(request, 'board/board_list.html', {'boards': boards})
+    elif k == 2:
+        boards = BoardModel.objects.filter(tag_iconteins=query)
+        return render(request, 'board/board_list.html', {'boards': boards})
+    
 
 def create_board(request):
     if request.method == "POST":
@@ -107,32 +117,54 @@ def board_sanka(request, board_id):
     boards = BoardModel.objects.all()
     return render(request, 'board/board_list.html', {'boards': boards, 'profile': profile})
 
+@login_required
 def create_profile(request):
-   if request.method == 'POST':
-       user = request.session.get('userid')
-       nickname = request.POST.get('nickname')
-       sex = request.POST.get('sex')
-       bio = request.POST.get('bio')
-       hobby = request.POST.get('hobby')
+    if request.method == 'POST':
+        user = request.user  # Google認証でログインしているユーザーを取得
+        nickname = request.POST.get('nickname', None)
+        sex = request.POST.get('sex', None)
+        bio = request.POST.get('bio', None)
+        hobby = request.POST.get('hobby', None)
 
-       if not nickname:
-           nickname = None
-       if not sex:
-           sex = None
-       if not bio:
-           bio = None
-       if not hobby:
-           hobby = None
+        # プロファイルの作成
+        profile, created = Profile.objects.get_or_create(
+            user=user,
+            defaults={
+                'nickname': nickname,
+                'sex': sex,
+                'bio': bio,
+                'hobby': hobby
+            }
+        )
 
-       profile = Profile(
-           user=user,
-           nickname=nickname,
-           sex=sex,
-           bio=bio,
-           hobby=hobby,
-       )
-       profile.save()
-       return render(request, 'profile/profile_create.html')
+        # 既にプロファイルがある場合は、更新
+        if not created:
+            profile.nickname = nickname or profile.nickname
+            profile.sex = sex or profile.sex
+            profile.bio = bio or profile.bio
+            profile.hobby = hobby or profile.hobby
+            profile.save()
 
-   return render(request, 'profile/profile_create.html')
+        profile = Profile.objects.get(user=request.user)
+        boards = BoardModel.objects.all()
+        return render(request, 'board/board_list.html', {'boards': boards, 'profile': profile})
+
+    return render(request, 'profile/profile_create.html')
+
+
+@login_required
+def edit_profile(request):
+    user = request.user
+    profile = get_object_or_404(Profile, user=user)
+
+    if request.method == 'POST':
+        profile.nickname = request.POST.get('nickname', profile.nickname)
+        profile.sex = request.POST.get('sex', profile.sex)
+        profile.bio = request.POST.get('bio', profile.bio)
+        profile.hobby = request.POST.get('hobby', profile.hobby)
+        profile.save()
+
+        return render(request, 'profile/profile_edit.html', {'profile': profile})
+
+    return render(request, 'profile/profile_edit.html', {'profile': profile})
 

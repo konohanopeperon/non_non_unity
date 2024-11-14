@@ -10,6 +10,8 @@
     <h2>掲示板一覧</h2>
     <form method="GET" action="{% url 'board_kensaku' %}">
         <input type="text" name="query" placeholder="検索欄">
+        <labal><input type="radio" name="k" value="1">タイトルで検索</labal>
+        <label><input type="radio" name="k" value="2">タグで検索</label>
         <button type="submit">検索</button>
     </form>
     <table border="1">
