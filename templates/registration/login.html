@@ -2,16 +2,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-   <title>ログイン</title>
+    <title>ログイン</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+        ul li a {
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #4285F4;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        ul li a:hover {
+            background-color: #357ae8;
+        }
+        .container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-{% extends 'base.html' %}
-
-{% block content %}
-    <h2>ログインに使用するサービスを選択してください</h2>
-    <ul>
-        <li><a href="{% url 'social:begin' 'google-oauth2' %}">Googleアカウントでログイン</a></li>
-    </ul>
-{% endblock %}
+    {% extends 'base.html' %}
+    {% block content %}
+    <div class="container">
+        <h2>ログインをしてください</h2>
+        <ul>
+            <li><a href="{% url 'social:begin' 'google-oauth2' %}">Googleアカウントでログイン</a></li>
+        </ul>
+    </div>
+    {% endblock %}
 </body>
 </html>

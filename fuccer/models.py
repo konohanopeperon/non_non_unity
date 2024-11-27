@@ -26,7 +26,11 @@ class BoardModel(models.Model):
         through='BoardParticipant',
         related_name='joined_boards'
     )
+    tags = models.ManyToManyField('Tag', related_name='boards', blank=True)  # ハッシュタグの追加
 
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)  # ハッシュタグ名
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class BoardParticipant(models.Model):
     board = models.ForeignKey(BoardModel, on_delete=models.CASCADE)

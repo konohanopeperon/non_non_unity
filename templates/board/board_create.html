@@ -1,25 +1,181 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
    <meta charset="UTF-8">
    <title>掲示板作成</title>
+   <style>
+       body {
+           font-family: 'Arial', sans-serif;
+           margin: 0;
+           padding: 0;
+           background-color: #f9f9f9;
+           color: #333;
+           display: flex;
+       }
+
+       /* サイドバー */
+       .sidebar {
+           width: 60px;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           background-color: #ffffff;
+           padding-top: 10px;
+           border-right: 1px solid #ddd;
+           position: fixed;
+           top: 0;
+           left: 0;
+           height: 100vh;
+       }
+
+       .sidebar a {
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           text-decoration: none;
+           color: #555;
+           margin: 10px 0;
+           border-radius: 50%;
+           background-color: #e0e0e0;
+           width: 50px;
+           height: 50px;
+           transition: background-color 0.3s, transform 0.3s;
+           overflow: hidden;
+       }
+
+       .sidebar a:hover {
+           background-color: #d0d0d0;
+           transform: scale(1.05);
+       }
+
+       .sidebar img {
+           width: 100%;
+           height: 100%;
+           object-fit: cover;
+           border-radius: 50%;
+       }
+
+       /* コンテナスタイル */
+       .container {
+           margin-left: 80px; /* サイドバーを避ける */
+           width: 95%;
+           max-width: 600px;
+           background-color: #ffffff;
+           border-radius: 10px;
+           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+           overflow: hidden;
+           margin-top: 20px;
+           padding: 20px;
+       }
+
+       .header {
+           padding: 15px;
+           text-align: center;
+           font-size: 1.8em;
+           font-weight: bold;
+           color: #333;
+           border-bottom: 1px solid #ddd;
+       }
+
+       label {
+           font-size: 1em;
+           color: #555;
+       }
+
+       /* フォームの入力要素 */
+       input, textarea {
+           width: 100%;
+           padding: 10px;
+           margin: 5px 0;
+           border-radius: 5px;
+           border: 1px solid #ddd;
+           font-size: 1em;
+           box-sizing: border-box; /* paddingを含めた幅で調整 */
+       }
+
+       textarea {
+           resize: vertical; /* 垂直方向のリサイズを許可 */
+       }
+
+       button {
+           padding: 10px 20px;
+           background-color: #ff0900;
+           color: white;
+           font-size: 1em;
+           border: none;
+           border-radius: 5px;
+           cursor: pointer;
+           transition: background-color 0.3s, transform 0.3s;
+       }
+
+       button:hover {
+           background-color: #0056b3;
+           transform: scale(1.05);
+       }
+
+       /* ボタンの配置 */
+       .form-group {
+           margin-bottom: 20px;
+       }
+       /* 戻るボタン */
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            font-size: 1em;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+            text-align: center;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+   </style>
 </head>
 <body>
-   <h1>掲示板を作成</h1>
-   <form action="{% url 'board_create' %}" method="post">
+<!-- サイドバー -->
+<div class="sidebar">
+   <a href="{% url 'board_list' %}"><img src="{% static 'images/掲示板.png' %}" alt="掲示板"></a>
+   <a href="{% url 'profile_list' %}"><img src="{% static 'images/プロフィール.png' %}" alt="プロフィール"></a>
+   <a href="#"><img src="{% static 'images/チャット.png' %}" alt="チャット"></a>
+   <a href="#"><img src="{% static 'images/電話.png' %}" alt="電話"></a>
+</div>
+
+<!-- メインコンテンツ -->
+<div class="container">
+   <div class="header">掲示板作成</div>
+   <form action="" method="post">
        {% csrf_token %}
-       <label for="title">タイトル:</label>
-       <input type="text" id="title" name="title" required><br><br>
 
-       <label for="participant_limit">参加人数</label>
-       <input type="number" id="participant_limit" name="participant_limit" required><br><br>
+       <div class="form-group">
+           <label for="title">タイトル:</label>
+           <input type="text" id="title" name="title" required>
+       </div>
 
-       <label for="description">説明:</label>
-       <textarea id="description" name="description" rows="4" required></textarea><br><br>
-       
+       <div class="form-group">
+           <label for="participant_limit">参加人数:</label>
+           <input type="number" id="participant_limit" name="participant_limit" required>
+       </div>
 
+       <div class="form-group">
+           <label for="description">説明:</label>
+           <textarea id="description" name="description" rows="4" required></textarea>
+       </div>
+
+       <div class="form-group">
+           <label for="tags">タグ (カンマ区切り):</label>
+           <input type="text" id="tags" name="tags" placeholder="例: スポーツ, ゲーム">
+       </div>
 
        <button type="submit">掲示板を作成</button>
    </form>
+    <a href="{% url 'board_list' %}" class="back-button">戻る</a>
+</div>
 </body>
 </html>

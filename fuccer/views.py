@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from fuccer.models import User, BoardModel, Profile, BoardParticipant
+from fuccer.models import User, BoardModel, Profile, BoardParticipant, Tag
+
 
 @login_required
 def home(request):
@@ -46,18 +47,32 @@ def logout(request):
 def board_kensaku(request):
     query = request.GET.get('query')
     k = request.GET.get('k')
+
     if not query:
         boards = BoardModel.objects.all()
-        return render(request, 'board/board_list.html',{'boards': boards})
+        return render(request, 'board/board_list.html', {'boards': boards})
+
     if not k:
         messages.error(request, 'タイトルかタグか指定してください')
-        return render(request, 'board/board_list.html')
+        boards = BoardModel.objects.all()  # リストが空の場合にも全て表示
+        return render(request, 'board/board_list.html', {'boards': boards})
+
+    try:
+        k = int(k)
+    except ValueError:
+        messages.error(request, '無効な検索オプションです')
+        boards = BoardModel.objects.all()
+        return render(request, 'board/board_list.html', {'boards': boards})
+
     if k == 1:
-        boards = BoardModel.objects.filter(title_iconteins=query)
-        return render(request, 'board/board_list.html', {'boards': boards})
+        boards = BoardModel.objects.filter(title__icontains=query)
     elif k == 2:
-        boards = BoardModel.objects.filter(tag_iconteins=query)
-        return render(request, 'board/board_list.html', {'boards': boards})
+        boards = BoardModel.objects.filter(tags__name__icontains=query)  # タグがManyToManyの場合
+    else:
+        messages.error(request, '無効な検索オプションです')
+        boards = BoardModel.objects.all()
+
+    return render(request, 'board/board_list.html', {'boards': boards})
     
 
 def create_board(request):
@@ -65,7 +80,10 @@ def create_board(request):
         title = request.POST.get('title')
         participant_limit = request.POST.get('participant_limit')
         description = request.POST.get('description')
+        tags_input = request.POST.get('tags')  # ハッシュタグフィールドを取得
         creator = request.user
+
+        # 必須フィールドのバリデーション
         if not title or not description:
             messages.error(request, 'タイトルまたは説明が空です。')
             return render(request, 'board/board_create.html')
@@ -80,9 +98,17 @@ def create_board(request):
         )
         board.save()
 
+        # ハッシュタグの処理
+        if tags_input:
+            tag_names = [tag.strip() for tag in tags_input.split(',')]
+            for name in tag_names:
+                if name:  # 空文字を無視
+                    tag, created = Tag.objects.get_or_create(name=name)
+                    board.tags.add(tag)
+
         messages.success(request, 'ボードが作成されました。')
         boards = BoardModel.objects.all()
-        return render(request, 'board/board_list.html', {'boards':boards})  # 適切なURL名に変更
+        return render(request, 'board/board_list.html', {'boards': boards})  # 適切なテンプレート名に変更
 
     return render(request, 'board/board_create.html')
 
@@ -116,6 +142,23 @@ def board_sanka(request, board_id):
 
     boards = BoardModel.objects.all()
     return render(request, 'board/board_list.html', {'boards': boards, 'profile': profile})
+
+
+@login_required
+def profile_list(request):
+    query = request.GET.get('query', '')
+
+    if query:
+        profiles = Profile.objects.filter(nickname__icontains=query)
+    else:
+        profiles = Profile.objects.all()
+
+    return render(request, 'profile/profile_list.html', {'profiles': profiles})
+
+@login_required
+def profile_detail(request, Profile_id):
+    profile = get_object_or_404(Profile, Profile_id=Profile_id)
+    return render(request, 'profile/profile_detail.html', {'profile': profile})
 
 @login_required
 def create_profile(request):
