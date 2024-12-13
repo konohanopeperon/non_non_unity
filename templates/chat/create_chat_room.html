@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新しいチャットルームを作成</title>
+    <style>
+        /* ベースのスタイル */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        /* コンテナ */
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* タイトル */
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+
+        /* フォーム要素 */
+        label {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
+            color: #555;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            color: #333;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #4cae4c;
+        }
+
+        /* スペーシング */
+        .form-group {
+            margin-bottom: 20px;
+        }
+/* ハンバーガーメニュー */
+        .hamburger-menu {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background-color: #333;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .hamburger-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            margin: 3px 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* メニューの表示・非表示切り替え */
+        .my-menu {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            width: 200px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+        }
+        .my-menu a {
+            text-decoration: none;
+            padding: 10px 15px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s;
+        }
+        .my-menu a:hover {
+            background-color: #f2f2f2;
+        }
+        .my-menu a:last-child {
+            border-bottom: none;
+        }
+
+        /* メニューが開いた時 */
+        .my-menu.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+<div class="hamburger-menu" id="hamburger-menu">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+
+<!-- マイメニュー -->
+<div class="my-menu" id="my-menu">
+    <a href="{% url 'my_profile' %}">プロフィール</a>
+    <a href="{% url 'favorite_list' %}">お気に入り</a>
+    <a href="{% url 'logout' %}">ログアウト</a>
+</div>
+<!-- コンテナ -->
+<div class="container">
+    <h1>新しいチャットルームを作成</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="name">ルーム名:</label>
+            <input type="text" name="name" id="name" maxlength="100" placeholder="ルーム名を入力" required>
+        </div>
+
+        <button type="submit">チャットルームを作成</button>
+    </form>
+</div>
+<script>
+         // ハンバーガーメニューのクリックイベント
+    document.getElementById("hamburger-menu").addEventListener("click", () => {
+        const menu = document.getElementById("my-menu");
+        menu.classList.toggle("show");
+    });
+</script>
+</body>
+</html>

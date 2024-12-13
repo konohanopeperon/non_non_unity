@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>チャットメニュー</title>
+    <style>
+        /* ベーススタイル */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        /* ナビゲーションバー */
+        nav {
+            background-color: #007bff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #fff;
+            font-size: 1em;
+            padding: 10px 20px;
+            background-color: #0056b3;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+            display: inline-block;
+        }
+
+        nav ul li a:hover {
+            background-color: #004099;
+            transform: scale(1.05);
+        }
+
+        /* コンテンツスタイル */
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content h1 {
+            font-size: 1.5em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<!-- ナビゲーションバー -->
+<nav>
+    <ul>
+        <li><a href="{% url 'create_chat_room' %}">チャット作成</a></li>
+        <li><a href="{% url 'my_chat_rooms' %}">参加済みチャット一覧</a></li>
+    </ul>
+</nav>
+
+<!-- コンテンツ -->
+<div class="content">
+    <h1>チャットメニューへようこそ！</h1>
+</div>
+</body>
+</html>

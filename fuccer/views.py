@@ -1,11 +1,40 @@
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
-from fuccer.models import User, BoardModel, Profile, BoardParticipant, Tag
+from fuccer.models import BoardModel, Profile, BoardParticipant, Tag, UserFavorite, ChatRoom, Message, Report
+from django.contrib.auth import get_user_model
+from django.shortcuts import redirect
+from django.contrib.admin.views.decorators import staff_member_required
+import random
+import string
 
+User = get_user_model()
+
+# 管理者チェック
+def admin_check(user):
+    return user.is_staff  # 管理者のみアクセス可能
+
+@user_passes_test(admin_check)
+def admin_dashboard(request):
+    # 統計情報を収集
+    user_count = User.objects.count()
+    active_users = User.objects.filter(is_active=True).count()
+    board_count = BoardModel.objects.count()
+    chat_count = ChatRoom.objects.count()
+    message_count = Message.objects.count()
+    favorite_count = UserFavorite.objects.count()
+
+    context = {
+        'user_count': user_count,
+        'active_users': active_users,
+        'board_count': board_count,
+        'chat_count': chat_count,
+        'message_count': message_count,
+        'favorite_count': favorite_count,
+    }
+    return render(request, 'admin/admin.html', context)
 
 @login_required
 def home(request):
@@ -18,13 +47,17 @@ def home(request):
             print(f"{attr}: {getattr(request.user, attr)}")
         except AttributeError:
             print(f"{attr}: [アクセス不可]")
-
-    try:
-        profile = Profile.objects.get(user=request.user)
-    except Profile.DoesNotExist:
-        return render(request, 'profile/profile_create.html')
-    boards = BoardModel.objects.all()
-    return render(request, 'board/board_list.html', {'boards': boards, 'profile':profile})
+        # ログインユーザがスーパーユーザかどうかをチェック
+    if request.user.is_superuser:
+        # スーパーユーザなら管理者用の処理
+        return render(request, 'admin/admin.html')
+    else:
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            return render(request, 'profile/profile_create.html')
+        boards = BoardModel.objects.filter(is_active=True)
+        return render(request, 'board/board_list.html', {'boards': boards, 'profile':profile})
 
 
 @login_required
@@ -35,7 +68,7 @@ def test_page(request):
 
 def board_list(request):
     # BoardModelテーブルの全レコードを取得
-    boards = BoardModel.objects.all()
+    boards = BoardModel.objects.filter(is_active=True)
     # HTMLテンプレートにデータを渡す
     return render(request, 'board/board_list.html', {'boards': boards})
 
@@ -73,42 +106,44 @@ def board_kensaku(request):
         boards = BoardModel.objects.all()
 
     return render(request, 'board/board_list.html', {'boards': boards})
-    
 
+
+@login_required
 def create_board(request):
     if request.method == "POST":
         title = request.POST.get('title')
-        participant_limit = request.POST.get('participant_limit')
+        participant_limit = request.POST.get('participant_limit', 0)
         description = request.POST.get('description')
-        tags_input = request.POST.get('tags')  # ハッシュタグフィールドを取得
+        tags_input = request.POST.get('tags')
         creator = request.user
 
-        # 必須フィールドのバリデーション
         if not title or not description:
             messages.error(request, 'タイトルまたは説明が空です。')
             return render(request, 'board/board_create.html')
 
-        # BoardModelのインスタンスを作成して保存
-        board = BoardModel(
+        try:
+            participant_limit = int(participant_limit)
+            if participant_limit <= 0:
+                raise ValueError
+        except ValueError:
+            messages.error(request, '参加上限は正の整数で指定してください。')
+            return render(request, 'board/board_create.html')
+
+        board = BoardModel.objects.create(
             title=title,
             participant_limit=participant_limit,
             description=description,
             creator=creator,
-            created_at=timezone.now(),
         )
-        board.save()
 
-        # ハッシュタグの処理
         if tags_input:
-            tag_names = [tag.strip() for tag in tags_input.split(',')]
+            tag_names = [tag.strip() for tag in tags_input.split(',') if tag.strip()]
             for name in tag_names:
-                if name:  # 空文字を無視
-                    tag, created = Tag.objects.get_or_create(name=name)
-                    board.tags.add(tag)
+                tag, created = Tag.objects.get_or_create(name=name)
+                board.tags.add(tag)
 
         messages.success(request, 'ボードが作成されました。')
-        boards = BoardModel.objects.all()
-        return render(request, 'board/board_list.html', {'boards': boards})  # 適切なテンプレート名に変更
+        return redirect('board_list')
 
     return render(request, 'board/board_create.html')
 
@@ -148,17 +183,33 @@ def board_sanka(request, board_id):
 def profile_list(request):
     query = request.GET.get('query', '')
 
+    # ログインユーザー以外をフィルタ
+    profiles = Profile.objects.exclude(user=request.user)
+
+
+    # 検索条件がある場合、さらにフィルタ
     if query:
-        profiles = Profile.objects.filter(nickname__icontains=query)
-    else:
-        profiles = Profile.objects.all()
+        profiles = profiles.filter(nickname__icontains=query)
 
     return render(request, 'profile/profile_list.html', {'profiles': profiles})
-
 @login_required
 def profile_detail(request, Profile_id):
     profile = get_object_or_404(Profile, Profile_id=Profile_id)
-    return render(request, 'profile/profile_detail.html', {'profile': profile})
+
+    # 現在のユーザーが登録したお気に入りリスト
+    user_favorites = request.user.favorites.values_list('favorite_user_id',
+                                                        flat=True) if request.user.is_authenticated else []
+
+    return render(request, 'profile/profile_detail.html', {
+        'profile': profile,
+        'user_favorites': user_favorites,
+    })
+
+@login_required
+def profile_detail_favorite(request, id):
+    profile = get_object_or_404(Profile, user_id=id)  # Profile_idで検索
+    user = profile.user  # Profileから関連するUserを取得
+    return render(request, 'profile/profile_detail_favorite.html', {'user': user, 'profile': profile})
 
 @login_required
 def create_profile(request):
@@ -196,18 +247,246 @@ def create_profile(request):
 
 
 @login_required
-def edit_profile(request):
-    user = request.user
-    profile = get_object_or_404(Profile, user=user)
+def profile_edit(request, Profile_id):
+    # Profileオブジェクトを取得
+    profile = get_object_or_404(Profile, Profile_id=Profile_id)
 
     if request.method == 'POST':
-        profile.nickname = request.POST.get('nickname', profile.nickname)
-        profile.sex = request.POST.get('sex', profile.sex)
-        profile.bio = request.POST.get('bio', profile.bio)
-        profile.hobby = request.POST.get('hobby', profile.hobby)
+        # フォームデータを取得
+        nickname = request.POST.get('nickname', profile.nickname)
+        sex = request.POST.get('sex', profile.sex)
+        bio = request.POST.get('bio', profile.bio)
+        hobby = request.POST.get('hobby', profile.hobby)
+
+        # オブジェクトを更新
+        profile.nickname = nickname
+        profile.sex = sex
+        profile.bio = bio
+        profile.hobby = hobby
         profile.save()
 
-        return render(request, 'profile/profile_edit.html', {'profile': profile})
+        return redirect('my_profile')  # 適切なリダイレクト先を設定
 
     return render(request, 'profile/profile_edit.html', {'profile': profile})
+@login_required
+def add_favorite(request, Profile_id):
+    user = request.user
+    favorite_profile = get_object_or_404(Profile, Profile_id=Profile_id)
 
+    if user.id == favorite_profile.user.id:
+        messages.error(request, "自分自身をお気に入りに登録することはできません。")
+        return redirect('profile_detail', Profile_id=Profile_id)
+
+    favorite_user = favorite_profile.user
+    favorite, created = UserFavorite.objects.get_or_create(
+        user=user,
+        favorite_user=favorite_user,
+    )
+
+    if created:
+        messages.success(request, f"{favorite_profile.nickname}をお気に入りに登録しました！")
+    else:
+        messages.info(request, f"{favorite_profile.nickname}は既にお気に入りに登録されています。")
+
+    return redirect('profile_detail', Profile_id=Profile_id)
+
+
+@login_required
+def remove_favorite(request, Profile_id):
+    user = request.user
+    favorite_profile = get_object_or_404(Profile, Profile_id=Profile_id)
+
+    favorite_user = favorite_profile.user
+    favorite = UserFavorite.objects.filter(user=user, favorite_user=favorite_user).first()
+
+    if favorite:
+        favorite.delete()
+        messages.success(request, f"{favorite_profile.nickname}をお気に入りから解除しました。")
+    else:
+        messages.info(request, f"{favorite_profile.nickname}はお気に入りに登録されていません。")
+
+    return redirect('profile_detail', Profile_id=Profile_id)
+
+
+@login_required
+def favorite_list(request):
+    favorites = UserFavorite.objects.filter(user=request.user).select_related('favorite_user')
+    return render(request, 'profile/favorite_list.html', {'favorites': favorites})
+
+
+def join_chat_room(request, room_id):
+    if request.method == 'POST':
+        room = get_object_or_404(ChatRoom, room_id=room_id)
+        user_id = request.POST.get('user_id')
+        user = get_object_or_404(User, id=user_id)
+        if user not in room.participants.all():
+            room.participants.add(user)
+        return redirect('chat_room', room_id=room_id)
+
+
+def chat_room(request, room_id):
+    room = get_object_or_404(ChatRoom, room_id=room_id)
+    messages = Message.objects.filter(room=room).order_by('timestamp')
+    available_users = User.objects.exclude(id__in=room.participants.all())
+    if request.method == 'POST' and 'content' in request.POST:
+        content = request.POST.get('content')
+        Message.objects.create(room=room, sender=request.user, content=content)
+        return redirect('chat_room', room_id=room_id)
+    return render(request, 'chat/chat_room.html', {'room': room, 'messages': messages, 'available_users': available_users})
+
+def create_chat_room(request):
+    if request.method == 'POST':
+        room_name = request.POST.get('name')
+        if room_name:
+            # チャットルームの作成
+            room = ChatRoom.objects.create(name=room_name)
+            room.participants.add(request.user)  # ルーム作成者が自動で参加
+            return redirect('chat_room', room_id=room.room_id)
+    return render(request, 'chat/create_chat_room.html')
+
+def my_chat_rooms(request):
+    # ログインユーザーが参加しているチャットルームを取得
+    chat_rooms = ChatRoom.objects.filter(participants=request.user)
+    return render(request, 'chat/my_chat_rooms.html', {'chat_rooms': chat_rooms})
+
+def chat_menu(request):
+    return render(request,'chat/chat_menu.html')
+
+@login_required
+def my_profile(request):
+    # ログイン中のユーザーに関連するプロフィールを取得
+    profile = get_object_or_404(Profile, user=request.user)
+    return render(request, 'profile/my_profile.html', {'profile': profile})
+
+@login_required
+def submit_report(request):
+    if request.method == 'POST':
+        reported_user_id = request.POST.get('reported_user')
+        reported_board_id = request.POST.get('reported_board')
+        report_reason = request.POST.get('report_reason')
+        details = request.POST.get('details')
+
+        if not report_reason:
+            messages.error(request, "通報理由を選択してください。")
+            return redirect('submit_report')
+
+        report = Report(
+            reporter=request.user,
+            report_reason=report_reason,
+            details=details
+        )
+
+        # 通報対象のユーザーを設定
+        if reported_user_id:
+            try:
+                report.reported_user = User.objects.get(id=reported_user_id)
+            except User.DoesNotExist:
+                messages.error(request, "選択されたユーザーが見つかりません。")
+                return redirect('submit_report')
+
+        # 通報対象の掲示板を設定
+        if reported_board_id:
+            try:
+                report.reported_board = BoardModel.objects.get(board_id=reported_board_id)
+            except BoardModel.DoesNotExist:
+                messages.error(request, "選択された掲示板が見つかりません。")
+                return redirect('submit_report')
+
+        report.save()
+        messages.success(request, "通報が送信されました。")
+        return redirect('board_list')
+
+    # ユーザーと掲示板リストをテンプレートに渡す
+    users = User.objects.all()
+    boards = BoardModel.objects.all()
+    return render(request, 'admin/submit_report.html', {'users': users, 'boards': boards})
+
+
+@login_required
+def submit_report(request):
+    if request.method == 'POST':
+        reported_user_id = request.POST.get('reported_user_id')
+        report_type = request.POST.get('report_type')
+        description = request.POST.get('description', '')
+
+        reported_user = get_object_or_404(User, id=reported_user_id)
+
+        # 通報の作成
+        report = Report.objects.create(
+            reporter=request.user,
+            reported_user=reported_user,
+            report_type=report_type,
+            description=description
+        )
+
+        messages.success(request, '通報が送信されました。管理者が確認します。')
+        return redirect('home')
+
+    # 通報対象ユーザーを選択するためのフォーム表示
+    profiles = Profile.objects.exclude(user=request.user)  # 自分以外のプロフィールをリスト
+    return render(request, 'report/submit_report.html', {'profiles': profiles})
+
+def report_list(request):
+    reports = Report.objects.all()
+    return render(request, 'admin/report_list.html', {'reports': reports})
+
+def manage_users(request):
+    users = User.objects.filter(is_superuser=0)
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        action = request.POST.get("action")
+        user = User.objects.get(id=user_id)
+        if action == "deactivate":
+            user.is_active = False
+            profile = Profile.objects.get(user=user)
+            profile.is_active = False
+            profile.save()
+            messages.success(request, f"ユーザ {user.email} を利用停止にしました。")
+        elif action == "activate":
+            user.is_active = True
+            profile = Profile.objects.get(user=user)
+            profile.is_active = True
+            profile.save()
+            messages.success(request, f"ユーザ {user.email} を利用可能にしました。")
+        user.save()
+        return redirect("manage_users")
+
+    return render(request, "admin/manage_users.html", {"users": users})
+
+def manage_boards(request):
+    boards = BoardModel.objects.all()
+    if request.method == "POST":
+        board_id = request.POST.get("board_id")
+        action = request.POST.get("action")
+        board = BoardModel.objects.get(board_id=board_id)
+        if action == "deactivate":
+            board.is_active = False
+            messages.success(request, f"掲示板 {board.title} を非表示にしました。")
+        elif action == "activate":
+            board.is_active = True
+            messages.success(request, f"掲示板 {board.title} を表示可能にしました。")
+        board.save()
+        return redirect("manage_boards")
+
+    return render(request, "admin/manage_boards.html", {"boards": boards})
+
+def admin_menu(request):
+    return render(request, 'admin/admin.html')
+
+def manage_kensaku(request):
+    query = request.GET.get('search', '')  # 検索クエリを取得
+    if query:
+        # last_nameまたはfirst_nameに部分一致するユーザを検索
+        users = User.objects.filter(Q(last_name__icontains=query) | Q(first_name__icontains=query))
+    else:
+        users = User.objects.all()  # 検索がなければ全て表示
+    return render(request, 'admin/manage_users.html', {'users': users, 'query': query})
+
+def keiji_kensaku(request):
+    query = request.GET.get('search', '')  # 検索クエリを取得
+    if query:
+        # last_nameまたはfirst_nameに部分一致するユーザを検索
+        boards = BoardModel.objects.filter(title__icontains=query)
+    else:
+        boards = BoardModel.objects.all()  # 検索がなければ全て表示
+    return render(request, 'admin/manage_boards.html', {'boards': boards, 'query': query})

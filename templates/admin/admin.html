@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理者画面</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .stat-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 25px;
+            width: 250px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        .stat-card h2 {
+            font-size: 28px;
+            margin: 0 0 10px;
+            color: #007bff;
+        }
+        .stat-card p {
+            font-size: 16px;
+            margin: 0;
+            color: #555;
+        }
+        .action-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 14px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .action-btn:hover {
+            background-color: #0056b3;
+        }
+        .manage-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        .manage-section a {
+            width: 200px;
+            padding: 12px;
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>管理者画面</h1>
+    <!-- 管理者ボタンセクション -->
+    <div class="manage-section">
+        <a href="{% url 'manage_users' %}" class="action-btn">ユーザー管理</a>
+        <a href="{% url 'manage_boards' %}" class="action-btn">掲示板管理</a>
+        <a href="{% url 'admin_report_list' %}" class="action-btn">通報履歴</a>
+    </div>
+</body>
+</html>

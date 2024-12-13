@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>レポート一覧</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 20px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #e9f7ff;
+        }
+        .status-cell {
+            text-align: center;
+        }
+        .back-btn {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>レポート一覧</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>報告者</th>
+                <th>報告されたユーザー</th>
+                <th>報告タイプ</th>
+                <th>詳細</th>
+                <th>報告日時</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.reporter.last_name }}{{ report.reporter.first_name }}</td>
+                <td>{{ report.reported_user.last_name }}{{ report.reported_user.first_name }}</td>
+                <td>{{ report.get_report_type_display }}</td>
+                <td>{{ report.description|default:"なし" }}</td>
+                <td>{{ report.created_at|date:"Y-m-d" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="btn-container">
+        <a href="{% url 'admin_menu' %}" class="back-btn">管理者画面に戻る</a>
+    </div>
+</body>
+</html>

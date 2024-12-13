@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掲示板管理</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 20px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #e9f7ff;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .status-cell {
+            text-align: center;
+        }
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-container input {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: 200px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .search-container button {
+            padding: 8px 16px;
+            font-size: 14px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            margin-left: 10px;
+        }
+        .search-container button:hover {
+            background-color: #0056b3;
+        }
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+        .messages {
+            margin-bottom: 20px;
+            color: green;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>掲示板管理</h1>
+
+    <!-- メッセージ表示 -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+ <!-- ユーザ検索フォーム -->
+    <div class="search-container">
+        <form method="GET" action="{% url 'keiji_kensaku' %}">
+            <input type="text" name="search" value="{{ query }}" placeholder="タイトルで検索">
+            <button type="submit">検索</button>
+        </form>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>タイトル</th>
+                <th>状態</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for board in boards %}
+            <tr>
+                <td>{{ board.title }}</td>
+                <td class="status-cell">{{ board.is_active|yesno:"表示,非表示" }}</td>
+                <td class="button-container">
+                    <form method="POST" action="{% url 'manage_boards' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="board_id" value="{{ board.board_id }}">
+                        {% if board.is_active %}
+                        <button type="submit" name="action" value="deactivate">非表示</button>
+                        {% else %}
+                        <button type="submit" name="action" value="activate">表示</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="btn-container">
+        <a href="{% url 'admin_menu' %}" class="back-btn">管理者画面に戻る</a>
+    </div>
+</body>
+</html>

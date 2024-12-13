@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>プロフィール一覧</title>
+    <title>お気に入りユーザー一覧</title>
     <style>
         /* ベースのスタイル */
         body {
@@ -48,7 +48,7 @@
         }
 
         /* プロフィールアイテム */
-        .profile-item {
+        .favorite-item {
             display: flex;
             align-items: center;
             padding: 10px 15px;
@@ -59,13 +59,13 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             cursor: pointer;
         }
-        .profile-item:hover {
+        .favorite-item:hover {
             background-color: #e6e6e6;
             transform: scale(1.02);
         }
 
         /* アイコン部分 */
-        .profile-item .icon {
+        .favorite-item .icon {
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -80,19 +80,19 @@
         }
 
         /* テキスト部分 */
-        .profile-text {
+        .favorite-text {
             display: flex;
             flex-direction: column;
             justify-content: center;
             line-height: 1.2;
             flex-grow: 1;
         }
-        .profile-nickname {
+        .favorite-nickname {
             font-weight: bold;
             font-size: 1em;
             color: #333;
         }
-        .profile-bio {
+        .favorite-bio {
             font-size: 0.9em;
             color: #666;
         }
@@ -122,8 +122,7 @@
         .search-form button:hover {
             background-color: #0056b3;
         }
-
-        /* サイドバースタイル */
+         /* サイドバー */
         .sidebar {
             width: 60px;
             display: flex;
@@ -137,7 +136,7 @@
             left: 0;
             height: 100vh;
         }
-        /* サイドバーのボタン */
+
         .sidebar a {
             display: flex;
             align-items: center;
@@ -150,27 +149,21 @@
             width: 50px;
             height: 50px;
             transition: background-color 0.3s, transform 0.3s;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
             overflow: hidden;
         }
+
         .sidebar a:hover {
             background-color: #d0d0d0;
             transform: scale(1.05);
         }
+
         .sidebar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
         }
-
-        /* メディアクエリ */
-        @media (min-width: 1024px) {
-            .container {
-                margin-left: 80px;
-            }
-        }
-        /* ハンバーガーメニュー */
+/* ハンバーガーメニュー */
         .hamburger-menu {
             position: fixed;
             top: 10px;
@@ -228,7 +221,6 @@
     </style>
 </head>
 <body>
-
 <!-- サイドバー -->
 <div class="sidebar">
     <a href="{% url 'board_list' %}"><img src="{% static 'images/掲示板.png' %}" alt="掲示板"></a>
@@ -250,32 +242,33 @@
 </div>
 <!-- メインコンテンツ -->
 <div class="container">
-    <div class="header">プロフィール一覧</div>
+    <div class="header">お気に入りユーザー一覧</div>
 
     <!-- 検索フォーム -->
-    <form class="search-form" method="GET" action="{% url 'profile_list' %}">
+    <form class="search-form" method="GET" action="#">
         <input type="text" name="query" placeholder="ニックネームで検索" value="{{ request.GET.query }}">
         <button type="submit">検索</button>
     </form>
 
-    <!-- プロフィールリスト -->
-    {% for profile in profiles %}
-    <a href="{% url 'profile_detail' profile.Profile_id %}" class="board-link">
-        <div class="profile-item">
-            <div class="icon">{{ profile.nickname|slice:":1" }}</div>
-            <div class="profile-text">
-                <div class="profile-nickname">{{ profile.nickname }}</div>
-                <div class="profile-bio">{{ profile.bio|default:"自己紹介はありません。" }}</div>
+    <!-- お気に入りユーザーリスト -->
+    {% if favorites %}
+        {% for favorite in favorites %}
+            <a href="{% url 'profile_detail_favorite' favorite.favorite_user.id %}" class="board-link">
+                <div class="favorite-item">
+                    <div class="icon">{{ favorite.favorite_user.nickname|slice:":1" }}</div>
+                    <div class="favorite-text">
+                        <div class="favorite-nickname">{{ favorite.favorite_user.last_name }}{{ favorite.favorite_user.first_name }}</div>
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    {% else %}
+        <div class="favorite-item">
+            <div class="favorite-text">
+                <div class="favorite-nickname">お気に入りユーザーはいません。</div>
             </div>
         </div>
-    </a>
-    {% empty %}
-    <div class="profile-item">
-        <div class="profile-text">
-            <div class="profile-nickname">該当するプロフィールはありません。</div>
-        </div>
-    </div>
-    {% endfor %}
+    {% endif %}
 </div>
 <script>
          // ハンバーガーメニューのクリックイベント
