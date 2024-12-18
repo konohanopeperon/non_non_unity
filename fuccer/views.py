@@ -2,14 +2,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 from fuccer.models import BoardModel, Profile, BoardParticipant, Tag, UserFavorite, ChatRoom, Message, Report
-from django.contrib.auth import get_user_model
-from django.shortcuts import redirect
-from django.contrib.admin.views.decorators import staff_member_required
-import random
-import string
-
+from django.contrib.auth import get_user_model, logout
+from django.shortcuts import render, redirect
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+import datetime
 User = get_user_model()
 
 # 管理者チェック
@@ -56,7 +55,7 @@ def home(request):
             profile = Profile.objects.get(user=request.user)
         except Profile.DoesNotExist:
             return render(request, 'profile/profile_create.html')
-        boards = BoardModel.objects.filter(is_active=True)
+        boards = BoardModel.objects.filter(is_active=True).exclude(creator=request.user)
         return render(request, 'board/board_list.html', {'boards': boards, 'profile':profile})
 
 
@@ -68,12 +67,12 @@ def test_page(request):
 
 def board_list(request):
     # BoardModelテーブルの全レコードを取得
-    boards = BoardModel.objects.filter(is_active=True)
+    boards = BoardModel.objects.filter(is_active=True).exclude(creator=request.user)
     # HTMLテンプレートにデータを渡す
     return render(request, 'board/board_list.html', {'boards': boards})
 
 
-def logout(request):
+def user_logout(request):
    logout(request)
    return render(request, 'registration/login.html')
 
@@ -82,25 +81,25 @@ def board_kensaku(request):
     k = request.GET.get('k')
 
     if not query:
-        boards = BoardModel.objects.all()
+        boards = BoardModel.objects.filter(is_active=True).exclude(creator=request.user)
         return render(request, 'board/board_list.html', {'boards': boards})
 
     if not k:
         messages.error(request, 'タイトルかタグか指定してください')
-        boards = BoardModel.objects.all()  # リストが空の場合にも全て表示
+        boards = BoardModel.objects.filter(is_active=True).exclude(creator=request.user)  # リストが空の場合にも全て表示
         return render(request, 'board/board_list.html', {'boards': boards})
 
     try:
         k = int(k)
     except ValueError:
         messages.error(request, '無効な検索オプションです')
-        boards = BoardModel.objects.all()
+        boards = BoardModel.objects.filter(is_active=True).exclude(creator=request.user)
         return render(request, 'board/board_list.html', {'boards': boards})
 
     if k == 1:
-        boards = BoardModel.objects.filter(title__icontains=query)
+        boards = BoardModel.objects.filter(is_active=1,title__icontains=query)
     elif k == 2:
-        boards = BoardModel.objects.filter(tags__name__icontains=query)  # タグがManyToManyの場合
+        boards = BoardModel.objects.filter(is_active=1,tags__name__icontains=query)  # タグがManyToManyの場合
     else:
         messages.error(request, '無効な検索オプションです')
         boards = BoardModel.objects.all()
@@ -114,6 +113,7 @@ def create_board(request):
         title = request.POST.get('title')
         participant_limit = request.POST.get('participant_limit', 0)
         description = request.POST.get('description')
+        scheduled_date = request.POST.get('scheduled_date')
         tags_input = request.POST.get('tags')
         creator = request.user
 
@@ -134,6 +134,7 @@ def create_board(request):
             participant_limit=participant_limit,
             description=description,
             creator=creator,
+            scheduled_date=scheduled_date,
         )
 
         if tags_input:
@@ -150,6 +151,11 @@ def create_board(request):
 def board_description(request, board_id):
         board = BoardModel.objects.get(board_id=board_id)
         return render(request, 'board/board_description.html', {'board':board})
+
+
+def my_board_description(request, board_id):
+    board = BoardModel.objects.get(board_id=board_id)
+    return render(request, 'board/my_board_description.html', {'board': board})
 
 
 def board_sanka(request, board_id):
@@ -175,9 +181,23 @@ def board_sanka(request, board_id):
     board.participants += 1
     board.save()
 
-    boards = BoardModel.objects.all()
+    boards = BoardModel.objects.filter(is_active=True).exclude(creator=request.user)
     return render(request, 'board/board_list.html', {'boards': boards, 'profile': profile})
 
+@login_required
+def edit_board(request, board_id):
+    board = get_object_or_404(BoardModel, board_id=board_id, creator=request.user)
+
+    if request.method == 'POST':
+        # POSTデータを受け取ってフォームデータを反映
+        board.title = request.POST.get('title')
+        board.description = request.POST.get('description')
+        board.participant_limit = request.POST.get('participant_limit')
+        board.scheduled_date = request.POST.get('scheduled_date') or None
+        board.save()
+        return redirect('my_keijiban')  # 保存後詳細ページへ
+
+    return render(request, 'board/board_edit.html', {'board': board})
 
 @login_required
 def profile_list(request):
@@ -240,7 +260,7 @@ def create_profile(request):
             profile.save()
 
         profile = Profile.objects.get(user=request.user)
-        boards = BoardModel.objects.all()
+        boards = BoardModel.objects.filter(is_active=True).exclude(creator=request.user)
         return render(request, 'board/board_list.html', {'boards': boards, 'profile': profile})
 
     return render(request, 'profile/profile_create.html')
@@ -347,6 +367,8 @@ def create_chat_room(request):
 def my_chat_rooms(request):
     # ログインユーザーが参加しているチャットルームを取得
     chat_rooms = ChatRoom.objects.filter(participants=request.user)
+    if not chat_rooms:
+        return redirect('create_chat_room')
     return render(request, 'chat/my_chat_rooms.html', {'chat_rooms': chat_rooms})
 
 def chat_menu(request):
@@ -399,7 +421,7 @@ def submit_report(request):
     # ユーザーと掲示板リストをテンプレートに渡す
     users = User.objects.all()
     boards = BoardModel.objects.all()
-    return render(request, 'admin/submit_report.html', {'users': users, 'boards': boards})
+    return render(request, 'report/submit_report.html', {'users': users, 'boards': boards})
 
 
 @login_required
@@ -470,6 +492,10 @@ def manage_boards(request):
 
     return render(request, "admin/manage_boards.html", {"boards": boards})
 
+def my_keijiban(request):
+    boards = BoardModel.objects.filter(creator=request.user)
+    return render(request,'board/my_boards.html', {"boards":boards})
+
 def admin_menu(request):
     return render(request, 'admin/admin.html')
 
@@ -482,6 +508,7 @@ def manage_kensaku(request):
         users = User.objects.all()  # 検索がなければ全て表示
     return render(request, 'admin/manage_users.html', {'users': users, 'query': query})
 
+
 def keiji_kensaku(request):
     query = request.GET.get('search', '')  # 検索クエリを取得
     if query:
@@ -490,3 +517,45 @@ def keiji_kensaku(request):
     else:
         boards = BoardModel.objects.all()  # 検索がなければ全て表示
     return render(request, 'admin/manage_boards.html', {'boards': boards, 'query': query})
+
+def create_google_meet_event(request):
+    social = request.user.social_auth.get(provider='google-oauth2')
+    creds = Credentials(
+        token=social.extra_data['access_token'],
+        refresh_token=social.extra_data.get('refresh_token'),
+        client_id='104966677750-o7nbpejt3mckq6omegkk1llasp1llj67.apps.googleusercontent.com',
+        client_secret='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',
+        token_uri='https://oauth2.googleapis.com/token',
+    )
+
+    service = build('calendar', 'v3', credentials=creds)
+    event = {
+        'summary': 'Google Meet Meeting',
+        'start': {
+            'dateTime': (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).isoformat() + 'Z',
+            'timeZone': 'UTC',
+        },
+        'end': {
+            'dateTime': (datetime.datetime.utcnow() + datetime.timedelta(minutes=40)).isoformat() + 'Z',
+            'timeZone': 'UTC',
+        },
+        'conferenceData': {
+            'createRequest': {
+                'conferenceSolutionKey': {'type': 'hangoutsMeet'},
+                'requestId': 'sample123',
+            }
+        },
+    }
+
+    try:
+        created_event = service.events().insert(
+            calendarId='primary',
+            body=event,
+            conferenceDataVersion=1
+        ).execute()
+
+        meet_url = created_event['conferenceData']['entryPoints'][0]['uri']
+        return render(request, 'meet_created.html', {'meet_url': meet_url})
+
+    except Exception as e:
+        return render(request, 'error.html', {'error': str(e)})

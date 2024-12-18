@@ -1,18 +1,20 @@
-import consumers
 from django.urls import path
 from . import views
 
 urlpatterns = [
 path('submit-report/', views.submit_report, name='submit_report'),
    path('', views.home, name='home'),
-   path('logout/', views.logout, name='logout'),
+   path('logout/', views.user_logout, name='logout'),
    path('home/', views.home, name='home'),
    path('test_page', views.test_page, name='test_page'),
    path('board/create', views.create_board, name='board_create'),
    path('boards/', views.board_list, name='board_list'),
+   path('boards/my_boards/', views.my_keijiban, name='my_keijiban'),
+   path('boards/my_boards/<uuid:board_id>/', views.my_board_description, name='my_board_description'),
    path('board/description/<uuid:board_id>/', views.board_description, name='board_description'),
    path('board/board_kensaku/', views.board_kensaku, name='board_kensaku'),
    path('board/board_sanka/<uuid:board_id>/', views.board_sanka, name='board_sanka'),
+   path('board/board_edit/<uuid:board_id>/', views.edit_board, name='edit_board'),
    path('profile/create/', views.create_profile, name='profile_create'),
    path('profile/list/', views.profile_list, name='profile_list'),
 path('profiles/<uuid:Profile_id>/', views.profile_detail, name='profile_detail'),
@@ -32,5 +34,6 @@ path("admin/manage_users/", views.manage_users, name="manage_users"),
    path("admin/manage_users/kensaku/", views.manage_kensaku, name="manage_kensaku"),
     path("admin/manage_boards/", views.manage_boards, name="manage_boards"),
    path("admin/", views.admin_menu, name='admin_menu'),
-   path("admin/manage_boards/kensaku/", views.keiji_kensaku, name="keiji_kensaku")
+   path("admin/manage_boards/kensaku/", views.keiji_kensaku, name="keiji_kensaku"),
+    path('create-meet/', views.create_google_meet_event, name='create_meet')
 ]

@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -178,6 +179,7 @@
 .create-board {
     display: flex;
     justify-content: center; /* 水平方向の中央揃え */
+    margin-top: 30px; /* ボタンを少し下に */
     margin-bottom: 15px;
 }
 
@@ -261,9 +263,9 @@
 <div class="sidebar">
     <a href="{% url 'board_list' %}"><img src="{% static 'images/掲示板.png' %}" alt="追加ボタン1"></a>
     <a href="{% url 'profile_list' %}"><img src="{% static 'images/プロフィール.png' %}" alt="追加ボタン2"></a>
-    <a href="{% url 'my_chat_rooms' %}"><img src="{% static 'images/チャット.png' %}" alt="追加ボタン3"></a>
-    <a href="#"><img src="{% static 'images/電話.png' %}" alt="追加ボタン4"></a>
-    <a href="{% url 'submit_report' %}"><img src="{% static 'images/電話.png' %}" alt="追加ボタン5"></a>
+    <a href="{% url 'create_chat_room' %}"><img src="{% static 'images/チャット.png' %}" alt="追加ボタン3"></a>
+    <a href="{% url 'create_meet' %}"><img src="{% static 'images/電話.png' %}" alt="追加ボタン4"></a>
+    <a href="{% url 'submit_report' %}"><img src="{% static 'images/通報.png' %}" alt="追加ボタン5"></a>
 </div>
 <!-- ハンバーガーメニュー -->
 <div class="hamburger-menu" id="hamburger-menu">
@@ -275,7 +277,8 @@
 <!-- マイメニュー -->
 <div class="my-menu" id="my-menu">
     <a href="{% url 'my_profile' %}">プロフィール</a>
-    <a href="{% url 'my_keijiban' %}">マイプロフィール</a>
+    <a href="{% url 'my_keijiban' %}">掲示板</a>
+    <a href="{% url 'my_chat_rooms' %}">チャット</a>
     <a href="{% url 'favorite_list' %}">お気に入り</a>
     <a href="{% url 'logout' %}">ログアウト</a>
 </div>
@@ -306,7 +309,7 @@
                 <div class="board-description">
                     作成者: {{ board.creator.last_name }}{{ board.creator.first_name }} |
                     参加人数: {{ board.participant_limit }} |
-                    作成日時: {{ board.created_at|date:"Y-m-d" }}
+                    実施日時： {{ board.scheduled_date|date:"Y-m-d" }}
                 </div>
             </div>
         </div>

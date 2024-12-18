@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,12 +29,13 @@
         h1 {
             text-align: center;
             color: #444;
+            margin-bottom: 20px;
         }
 
         /* フォーム要素 */
         label {
             font-size: 1.1em;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             display: block;
             color: #555;
         }
@@ -41,11 +43,13 @@
         input[type="text"] {
             width: 100%;
             padding: 10px;
+            margin-top: 5px;
             margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 1em;
             color: #333;
+            box-sizing: border-box;
         }
 
         button[type="submit"] {
@@ -64,11 +68,58 @@
             background-color: #4cae4c;
         }
 
-        /* スペーシング */
-        .form-group {
-            margin-bottom: 20px;
+        /* サイドバースタイル */
+        .sidebar {
+            width: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            padding-top: 10px;
+            border-right: 1px solid #ddd;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
         }
-/* ハンバーガーメニュー */
+        /* サイドバーのボタン */
+.sidebar a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #555;
+    margin: 10px 0;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    width: 50px; /* ボタンの幅を調整 */
+    height: 50px; /* ボタンの高さを調整 */
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    overflow: hidden; /* ボタン外の画像を隠す */
+}
+
+/* サイドバーボタンにホバー時の効果 */
+.sidebar a:hover {
+    background-color: #d0d0d0;
+    transform: scale(1.05);
+}
+
+/* アイコン画像のスタイル */
+.sidebar img {
+    width: 100%; /* ボタンのサイズに合わせる */
+    height: 100%; /* ボタンのサイズに合わせる */
+    object-fit: cover; /* 画像をボタン内にフィット */
+    border-radius: 50%; /* 画像自体も丸くする */
+}
+        /* メディアクエリ（デスクトップ表示用） */
+        @media (min-width: 1024px) {
+            .container {
+                margin-left: 80px;
+            }
+        }
+        
+        /* ハンバーガーメニュー */
         .hamburger-menu {
             position: fixed;
             top: 10px;
@@ -124,8 +175,18 @@
             display: flex;
         }
     </style>
+    <link rel="icon" href="/static/images/favicon.ico/favicon-96x96.png" type="image/png">
 </head>
 <body>
+<!-- サイドバー -->
+<div class="sidebar">
+    <a href="{% url 'board_list' %}"><img src="{% static 'images/掲示板.png' %}" alt="追加ボタン1"></a>
+    <a href="{% url 'profile_list' %}"><img src="{% static 'images/プロフィール.png' %}" alt="追加ボタン2"></a>
+    <a href="{% url 'create_chat_room' %}"><img src="{% static 'images/チャット.png' %}" alt="追加ボタン3"></a>
+    <a href="{% url 'create_meet' %}"><img src="{% static 'images/電話.png' %}" alt="追加ボタン4"></a>
+    <a href="{% url 'submit_report' %}"><img src="{% static 'images/通報.png' %}" alt="追加ボタン5"></a>
+</div>
+<!--ハンバーガーメニュー -->
 <div class="hamburger-menu" id="hamburger-menu">
     <span></span>
     <span></span>
@@ -135,9 +196,12 @@
 <!-- マイメニュー -->
 <div class="my-menu" id="my-menu">
     <a href="{% url 'my_profile' %}">プロフィール</a>
+    <a href="{% url 'my_keijiban' %}">掲示板</a>
+    <a href="{% url 'my_chat_rooms' %}">チャット</a>
     <a href="{% url 'favorite_list' %}">お気に入り</a>
     <a href="{% url 'logout' %}">ログアウト</a>
 </div>
+
 <!-- コンテナ -->
 <div class="container">
     <h1>新しいチャットルームを作成</h1>
@@ -153,8 +217,9 @@
         <button type="submit">チャットルームを作成</button>
     </form>
 </div>
+
 <script>
-         // ハンバーガーメニューのクリックイベント
+    // ハンバーガーメニューのクリックイベント
     document.getElementById("hamburger-menu").addEventListener("click", () => {
         const menu = document.getElementById("my-menu");
         menu.classList.toggle("show");

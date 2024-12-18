@@ -235,11 +235,12 @@
         <p>{{ board.participant_limit }}人</p>
     </div>
     <div class="button-container">
-    <a href="{% url 'board_list' %}" class="back-button">戻る</a>
+    <a href="{% url 'my_keijiban' %}" class="back-button">戻る</a>
     
     {% if request.user == board.creator %}
         <!-- 編集ボタン: 自分の掲示板の場合 -->
         <a href="{% url 'edit_board' board.board_id %}" class="join-button">編集する</a>
+        <a href="{% url 'board_participants' board.board_id %}" class="participats-button">参加希望を見る</a>
     {% else %}
         <!-- 参加ボタン: 他人の掲示板の場合 -->
         <form method="POST" action="{% url 'board_sanka' board.board_id %}">

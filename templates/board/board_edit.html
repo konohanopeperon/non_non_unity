@@ -1,10 +1,93 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>掲示板編集</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ board.title }}を編集</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background-color: #ffffff;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.8em;
+            color: #444;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .button-container {
+            text-align: center; /* 横方向中央揃え */
+            margin-top: 20px; /* 上の要素との余白 */
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+    </style>
 </head>
 <body>
+<div class="container">
+    <h1>{{ board.title }}を編集</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="title">タイトル</label>
+        <input type="text" id="title" name="title" value="{{ board.title }}" required>
 
+        <label for="description">説明</label>
+        <textarea id="description" name="description" rows="5" required>{{ board.description }}</textarea>
+
+        <label for="participant_limit">参加上限人数</label>
+        <input type="number" id="participant_limit" name="participant_limit" value="{{ board.participant_limit }}" min="0">
+
+        <label for="scheduled_date">実施日時</label>
+        <input type="datetime-local" id="scheduled_date" name="scheduled_date" value="{{ board.scheduled_date|date:'Y-m-d\TH:i' }}">
+        
+        <!-- ボタンを中央に配置 -->
+        <div class="button-container">
+            <button type="submit">保存する</button>
+        </div>
+    </form>
+</div>
 </body>
 </html>

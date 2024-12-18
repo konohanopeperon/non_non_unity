@@ -191,6 +191,7 @@
     border-radius: 50%; /* 画像自体も丸くする */
 }
     </style>
+    <link rel="icon" href="/static/images/favicon.ico/favicon-96x96.png" type="image/png">
 </head>
 <body>
 <!-- サイドバー -->
@@ -198,7 +199,8 @@
     <a href="{% url 'board_list' %}"><img src="{% static 'images/掲示板.png' %}" alt="追加ボタン1"></a>
     <a href="{% url 'profile_list' %}"><img src="{% static 'images/プロフィール.png' %}" alt="追加ボタン2"></a>
     <a href="{% url 'my_chat_rooms' %}"><img src="{% static 'images/チャット.png' %}" alt="追加ボタン3"></a>
-    <a href="#"><img src="{% static 'images/電話.png' %}" alt="追加ボタン4"></a>
+    <a href="{% url 'create_meet' %}"><img src="{% static 'images/電話.png' %}" alt="追加ボタン4"></a>
+    <a href="{% url 'submit_report' %}"><img src="{% static 'images/通報.png' %}" alt="電話"></a>
 </div>
 <div class="hamburger-menu" id="hamburger-menu">
     <span></span>
@@ -209,6 +211,8 @@
 <!-- マイメニュー -->
 <div class="my-menu" id="my-menu">
     <a href="{% url 'my_profile' %}">プロフィール</a>
+    <a href="{% url 'my_keijiban' %}">掲示板</a>
+    <a href="{% url 'my_chat_rooms' %}">チャット</a>
     <a href="{% url 'favorite_list' %}">お気に入り</a>
     <a href="{% url 'logout' %}">ログアウト</a>
 </div>
