@@ -4,39 +4,129 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>プロフィール作成</title>
+   <style>
+       body {
+           font-family: Arial, sans-serif;
+           margin: 0;
+           padding: 0;
+           background-color: #f9f9f9;
+           color: #333;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+       }
+
+       .container {
+           width: 90%;
+           max-width: 600px;
+           background-color: #ffffff;
+           border-radius: 10px;
+           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+           padding: 20px;
+           margin-top: 20px;
+       }
+
+       h1 {
+           font-size: 1.8em;
+           font-weight: bold;
+           color: #333;
+           text-align: center;
+           margin-bottom: 20px;
+       }
+
+       form {
+           display: flex;
+           flex-direction: column;
+       }
+
+       label {
+           font-size: 1em;
+           margin-bottom: 5px;
+           font-weight: bold;
+           color: #555;
+       }
+
+       input[type="text"], textarea {
+           font-size: 1em;
+           padding: 10px;
+           margin-bottom: 15px;
+           border: 1px solid #ddd;
+           border-radius: 5px;
+           width: 100%;
+           box-sizing: border-box;
+       }
+
+       textarea {
+           resize: none;
+       }
+
+       input[type="radio"] {
+           margin-right: 5px;
+       }
+
+       button {
+           padding: 10px 20px;
+           font-size: 1em;
+           color: #fff;
+           background-color: #007BFF;
+           border: none;
+           border-radius: 5px;
+           cursor: pointer;
+           transition: background-color 0.3s;
+       }
+
+       button:hover {
+           background-color: #0056b3;
+       }
+
+       .radio-group {
+           display: flex;
+           gap: 15px;
+           margin-bottom: 15px;
+       }
+   </style>
 </head>
 <body>
+<div class="hamburger-menu" id="hamburger-menu">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
 
+<!-- マイメニュー -->
+<div class="my-menu" id="my-menu">
+    <a href="{% url 'logout' %}">ログアウト</a>
+</div>
+   <div class="container">
+       <h1>プロフィール作成</h1>
+       <form method="POST" action="{% url 'profile_create' %}">
+           {% csrf_token %}
+           <label for="nickname">ニックネーム</label>
+           <input type="text" id="nickname" name="nickname" required>
 
-   <nav>
-       <a href="profile_create.html">プロフィール作成</a>
-       <a href="profile_edit.html">プロフィール編集</a>
-       <a href="profile_list.html">プロフィール一覧</a>
-       <a href="search_accounts.html">アカウント検索</a>
-   </nav>
+           <label>性別</label>
+           <div class="radio-group">
+               <label><input type="radio" name="sex" value="1" required> 男</label>
+               <label><input type="radio" name="sex" value="2"> 女</label>
+               <label><input type="radio" name="sex" value="3"> その他</label>
+           </div>
 
+           <label for="bio">自己紹介</label>
+           <textarea id="bio" name="bio" rows="5" required></textarea>
 
-   <h1>プロフィールを作成する</h1>
-   <form method="POST" action="{% url 'profile_create' %}">
-       {% csrf_token %}
-       <label for="nickname">ニックネーム</label>
-       <input type="text" id="nickname" name="nickname" required>
+           <label for="hobby">趣味</label>
+           <textarea id="hobby" name="hobby" rows="2" required></textarea>
 
-
-       <label><input type="radio" name="sex" value="1" required> 男</label>
-       <label><input type="radio" name="sex" value="2"> 女</label>
-       <label><input type="radio" name="sex" value="3"> なし</label>
-
-
-       <label for="bio">自己紹介</label>
-       <textarea id="bio" name="bio" rows="5" required></textarea>
-
-
-       <label for="hobby">趣味</label>
-       <textarea id="hobby" name="hobby" rows="2" required></textarea>
-
-
-       <button type="submit">プロフィールを作成</button>
-   </form>
+           <button type="submit">プロフィールを作成</button>
+           <input type="hidden" name="userid" value="{{ user.userid }}">
+       </form>
+   </div>
+<script>
+         // ハンバーガーメニューのクリックイベント
+    document.getElementById("hamburger-menu").addEventListener("click", () => {
+        const menu = document.getElementById("my-menu");
+        menu.classList.toggle("show");
+    });
+</script>
 </body>
 </html>

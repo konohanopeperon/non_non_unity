@@ -1,81 +1,250 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>プロフィール編集</title>
-   <style>
-       body {
-           font-family: Arial, sans-serif;
-           margin: 20px;
-       }
-       nav {
-           margin-bottom: 20px;
-       }
-       nav a {
-           margin-right: 15px;
-           text-decoration: none;
-           color: #333;
-       }
-       form {
-           max-width: 600px;
-           margin: 0 auto;
-       }
-       label {
-           display: block;
-           margin-bottom: 8px;
-           font-weight: bold;
-       }
-       input, textarea {
-           width: 100%;
-           padding: 10px;
-           margin-bottom: 15px;
-           border: 1px solid #ccc;
-           border-radius: 4px;
-       }
-       button {
-           padding: 10px 25px;
-           background-color: #2196F3;
-           color: white;
-           border: none;
-           border-radius: 4px;
-           cursor: pointer;
-       }
-       button:hover {
-           background-color: #0b7dda;
-       }
-   </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロフィール編集</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f3f4f6; /* 背景色を柔らかいグレーに */
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: 30px auto;
+            padding: 20px 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: none; /* サイズ変更を無効化 */
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+        /* サイドバースタイル */
+        .sidebar {
+            width: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            padding-top: 10px;
+            border-right: 1px solid #ddd;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+        }
+        /* サイドバーのボタン */
+.sidebar a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #555;
+    margin: 10px 0;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    width: 50px; /* ボタンの幅を調整 */
+    height: 50px; /* ボタンの高さを調整 */
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    overflow: hidden; /* ボタン外の画像を隠す */
+}
+
+/* サイドバーボタンにホバー時の効果 */
+.sidebar a:hover {
+    background-color: #d0d0d0;
+    transform: scale(1.05);
+}
+
+/* アイコン画像のスタイル */
+.sidebar img {
+    width: 100%; /* ボタンのサイズに合わせる */
+    height: 100%; /* ボタンのサイズに合わせる */
+    object-fit: cover; /* 画像をボタン内にフィット */
+    border-radius: 50%; /* 画像自体も丸くする */
+}
+        /* メディアクエリ（デスクトップ表示用） */
+        @media (min-width: 1024px) {
+            .container {
+                margin-left: 80px;
+            }
+        }
+        /* ハンバーガーメニュー */
+        .hamburger-menu {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background-color: #333;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .hamburger-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            margin: 3px 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* メニューの表示・非表示切り替え */
+        .my-menu {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            width: 200px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+        }
+        .my-menu a {
+            text-decoration: none;
+            padding: 10px 15px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s;
+        }
+        .my-menu a:hover {
+            background-color: #f2f2f2;
+        }
+        .my-menu a:last-child {
+            border-bottom: none;
+        }
+
+        /* メニューが開いた時 */
+        .my-menu.show {
+            display: flex;
+        }
+    </style>
+    <link rel="icon" href="/static/images/favicon.ico/favicon-96x96.png" type="image/png">
 </head>
 <body>
+<!-- サイドバー -->
+<div class="sidebar">
+    <a href="{% url 'board_list' %}"><img src="{% static 'images/掲示板.png' %}" alt="追加ボタン1"></a>
+    <a href="{% url 'profile_list' %}"><img src="{% static 'images/プロフィール.png' %}" alt="追加ボタン2"></a>
+    <a href="{% url 'create_chat_room' %}"><img src="{% static 'images/チャット.png' %}" alt="追加ボタン3"></a>
+    <a href="{% url 'create_meet' %}"><img src="{% static 'images/電話.png' %}" alt="追加ボタン4"></a>
+    <a href="{% url 'submit_report' %}"><img src="{% static 'images/通報.png' %}" alt="追加ボタン5"></a>
+</div>
+<div class="hamburger-menu" id="hamburger-menu">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
 
+<!-- マイメニュー -->
+<div class="my-menu" id="my-menu">
+    <a href="{% url 'my_profile' %}">プロフィール</a>
+    <a href="{% url 'my_keijiban' %}">掲示板</a>
+    <a href="{% url 'my_chat_rooms' %}">チャット</a>
+    <a href="{% url 'favorite_list' %}">お気に入り</a>
+    <a href="{% url 'logout' %}">ログアウト</a>
+</div>
+    <div class="container">
+        <h1>プロフィール編集</h1>
+        <form method="post">
+            {% csrf_token %}
 
-   <nav>
-       <a href="create_profile.html">プロフィール作成</a>
-       <a href="profile_edit.html">プロフィール編集</a>
-       <a href="profile_list.html">プロフィール一覧</a>
-       <a href="search_accounts.html">アカウント検索</a>
-   </nav>
+            <label for="nickname">ニックネーム:</label>
+            <input type="text" id="nickname" name="nickname" value="{{ profile.nickname }}" maxlength="20" required>
 
+            <label for="sex">性別:</label>
+            <select id="sex" name="sex">
+                <option value="0" {% if profile.sex == 3 %}selected{% endif %}>その他</option>
+                <option value="1" {% if profile.sex == 1 %}selected{% endif %}>男性</option>
+                <option value="2" {% if profile.sex == 2 %}selected{% endif %}>女性</option>
+            </select>
 
-   <h1>プロフィールを編集する</h1>
-   <form action="/edit_profile" method="POST">
-       <label for="username">ユーザー名</label>
-       <input type="text" id="username" name="username" value="現在のユーザー名" required>
+            <label for="bio">自己紹介:</label>
+            <textarea id="bio" name="bio" rows="4">{{ profile.bio }}</textarea>
 
+            <label for="hobby">趣味:</label>
+            <textarea id="hobby" name="hobby" rows="2">{{ profile.hobby }}</textarea>
 
-       <label for="email">メールアドレス</label>
-       <input type="email" id="email" name="email" value="current@example.com" required>
-
-
-       <label for="bio">自己紹介</label>
-       <textarea id="bio" name="bio" rows="5" required>現在の自己紹介内容</textarea>
-
-       <label for="hobby">趣味</label>
-       <textarea id="hobby" name="hobby" rows="2" required>現在の趣味</textarea>
-
-       <button type="submit">プロフィールを更新</button>
-   </form>
-
-
+            <button type="submit">保存</button>
+        </form>
+        <a href="{% url 'my_profile' %}">戻る</a>
+    </div>
+<script>
+         // ハンバーガーメニューのクリックイベント
+    document.getElementById("hamburger-menu").addEventListener("click", () => {
+        const menu = document.getElementById("my-menu");
+        menu.classList.toggle("show");
+    });
+</script>
 </body>
 </html>
