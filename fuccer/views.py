@@ -554,7 +554,10 @@ def create_google_meet_event(request):
             conferenceDataVersion=1
         ).execute()
 
+        # Google Meet URLを取得
         meet_url = created_event['conferenceData']['entryPoints'][0]['uri']
+
+        # リンクをテンプレートに渡す
         return render(request, 'meet_created.html', {'meet_url': meet_url})
 
     except Exception as e:

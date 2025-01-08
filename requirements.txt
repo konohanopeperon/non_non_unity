@@ -1,0 +1,3 @@
+django
+social-auth-app-django
+google-api-python-client
