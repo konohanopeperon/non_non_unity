@@ -347,7 +347,7 @@ def join_chat_room(request, room_id):
 def chat_room(request, room_id):
     room = get_object_or_404(ChatRoom, room_id=room_id)
     messages = Message.objects.filter(room=room).order_by('timestamp')
-    available_users = User.objects.exclude(id__in=room.participants.all())
+    available_users = User.objects.exclude(id__in=room.participants.values_list('id', flat=True)).filter(is_superuser=False)
     if request.method == 'POST' and 'content' in request.POST:
         content = request.POST.get('content')
         Message.objects.create(room=room, sender=request.user, content=content)
