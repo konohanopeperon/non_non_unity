@@ -43,30 +43,168 @@
             border-radius: 5px;
             box-sizing: border-box;
         }
-        .button-container {
-            text-align: center; /* 横方向中央揃え */
-            margin-top: 20px; /* 上の要素との余白 */
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
+         .button-container {
+        display: flex; /* フレックスボックスでボタンを横並びに */
+        justify-content: center; /* ボタンを中央揃え */
+        gap: 10px; /* ボタン間のスペース */
+        margin-top: 20px; /* 上の要素との余白 */
+    }
+          button {
+        background-color: #FF0000; /* 保存するボタンを赤色 */
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+        text-decoration: none; /* リンク装飾を削除 */
+        display: inline-block; /* ボタンのように表示 */
+        transition: background-color 0.3s;
+    }
+    .back-button {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+        text-decoration: none; /* リンク装飾を削除 */
+        display: inline-block; /* ボタンのように表示 */
+        transition: background-color 0.3s;
+    }
+    button:hover, .back-button:hover {
+        background-color: #0056b3;
+    }
         input[type="checkbox"] {
             width: auto;
             margin-right: 5px;
         }
+        /* サイドバー */
+    .sidebar {
+        width: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #ffffff;
+        padding-top: 10px;
+        border-right: 1px solid #ddd;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+    }
+
+    .sidebar a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #555;
+        margin: 10px 0;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        width: 50px;
+        height: 50px;
+        transition: background-color 0.3s, transform 0.3s;
+        overflow: hidden;
+    }
+
+    .sidebar a:hover {
+        background-color: #d0d0d0;
+        transform: scale(1.05);
+    }
+
+    .sidebar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+        /* ハンバーガーメニュー */
+    .hamburger-menu {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        background-color: #333;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 1000;
+    }
+
+    .hamburger-menu span {
+        display: block;
+        width: 25px;
+        height: 3px;
+        background-color: #fff;
+        margin: 3px 0;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* メニューの表示・非表示切り替え */
+    .my-menu {
+        position: fixed;
+        top: 60px;
+        right: 10px;
+        width: 200px;
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        display: none;
+        flex-direction: column;
+        z-index: 999;
+    }
+
+    .my-menu a {
+        text-decoration: none;
+        padding: 10px 15px;
+        color: #333;
+        border-bottom: 1px solid #ddd;
+        transition: background-color 0.3s;
+    }
+
+    .my-menu a:hover {
+        background-color: #f2f2f2;
+    }
+
+    .my-menu a:last-child {
+        border-bottom: none;
+    }
+
+    /* メニューが開いた時 */
+    .my-menu.show {
+        display: flex;
+    }
     </style>
 </head>
 <body>
+<!-- サイドバー -->
+<div class="sidebar">
+    <a href="{% url 'board_list' %}"><img src="{% static 'images/掲示板.png' %}" alt="掲示板"></a>
+    <a href="{% url 'profile_list' %}"><img src="{% static 'images/プロフィール.png' %}" alt="プロフィール"></a>
+    <a href="{% url 'create_chat_room' %}"><img src="{% static 'images/チャット.png' %}" alt="チャット"></a>
+    <a href="{% url 'create_meet' %}"><img src="{% static 'images/電話.png' %}" alt="電話"></a>
+    <a href="{% url 'submit_report' %}"><img src="{% static 'images/通報.png' %}" alt="電話"></a>
+</div>
+<div class="hamburger-menu" id="hamburger-menu">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+
+<!-- マイメニュー -->
+<div class="my-menu" id="my-menu">
+    <a href="{% url 'my_profile' %}">プロフィール</a>
+    <a href="{% url 'my_keijiban' %}">掲示板</a>
+    <a href="{% url 'my_chat_rooms' %}">チャット</a>
+    <a href="{% url 'favorite_list' %}">お気に入り</a>
+    <a href="{% url 'logout' %}">ログアウト</a>
+</div>
 <div class="container">
     <h1>{{ board.title }}を編集</h1>
     <form method="POST">
@@ -85,9 +223,17 @@
         
         <!-- ボタンを中央に配置 -->
         <div class="button-container">
-            <button type="submit">保存する</button>
-        </div>
+            <a href="{% url 'my_keijiban'  %}" class="back-button">戻る</a>
+        <button type="submit">保存する</button>
+</div>
     </form>
 </div>
+<script>
+         // ハンバーガーメニューのクリックイベント
+    document.getElementById("hamburger-menu").addEventListener("click", () => {
+        const menu = document.getElementById("my-menu");
+        menu.classList.toggle("show");
+    });
+</script>
 </body>
 </html>

@@ -157,13 +157,21 @@ def my_board_description(request, board_id):
     board = BoardModel.objects.get(board_id=board_id)
     return render(request, 'board/my_board_description.html', {'board': board})
 
+def board_participants(request, board_id):
+    board = get_object_or_404(BoardModel, pk=board_id)
+    participants = BoardParticipant.objects.filter(board=board).select_related('user')
+    context = {
+        'board': board,
+        'participants': participants,
+    }
+    return render(request, 'board/board_participants.html', context)
 
 def board_sanka(request, board_id):
     board = get_object_or_404(BoardModel, board_id=board_id)
 
     user = request.user
 
-    # ユーザーに関連するプロフィールがあるかを確認
+    # ユーザーに関連するプmyロフィールがあるかを確認
     profile = Profile.objects.filter(user=user).first()
     if not profile:
         return HttpResponse("参加するには自分のプロフィールを作成する必要があります")
