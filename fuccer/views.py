@@ -59,12 +59,6 @@ def home(request):
         return render(request, 'board/board_list.html', {'boards': boards, 'profile':profile})
 
 
-@login_required
-def test_page(request):
-    # ユーザ名取得
-    print(f"Current user: {request.user.username}")
-    return render(request, 'test_page.html')
-
 def board_list(request):
     # BoardModelテーブルの全レコードを取得
     boards = BoardModel.objects.filter(is_active=True).exclude(creator=request.user)
@@ -371,6 +365,24 @@ def create_chat_room(request):
             room.participants.add(request.user)  # ルーム作成者が自動で参加
             return redirect('chat_room', room_id=room.room_id)
     return render(request, 'chat/create_chat_room.html')
+
+def create_keijibanchat_room(request, board_id):
+    # 対象の掲示板を取得
+    board = get_object_or_404(BoardModel, pk=board_id)
+    # チャットルームを取得または作成
+    room = ChatRoom.objects.create(name=board.title)
+
+    # 掲示板の参加者を全員取得
+    participants = BoardParticipant.objects.filter(board=board).select_related('user')
+
+    # チャットルームの参加者に追加
+    for participant in participants:
+        room.participants.add(participant.user)
+
+    # リクエストユーザーも参加者として追加
+    room.participants.add(request.user)
+
+    return redirect('chat_room', room_id=room.room_id)
 
 def my_chat_rooms(request):
     # ログインユーザーが参加しているチャットルームを取得

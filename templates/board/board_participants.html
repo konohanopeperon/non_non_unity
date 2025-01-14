@@ -107,85 +107,97 @@
         .button-container {
             display: flex;
             justify-content: center; /* ボタンを中央に配置 */
-            align-items: center;
+            gap: 10px;
             margin-top: 20px;
         }
 
-        .back-button {
+        .back-button, .create-button {
             display: inline-block;
             padding: 10px 20px;
             font-size: 1em;
             border-radius: 5px;
             text-align: center;
             text-decoration: none;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .back-button {
             background-color: #007BFF;
             color: white;
-            transition: background-color 0.3s, transform 0.3s;
         }
 
         .back-button:hover {
             background-color: #0056b3;
             transform: scale(1.05);
         }
-           /* ハンバーガーメニュー */
-    .hamburger-menu {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        width: 40px;
-        height: 40px;
-        background-color: #333;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        z-index: 1000;
-    }
 
-    .hamburger-menu span {
-        display: block;
-        width: 25px;
-        height: 3px;
-        background-color: #fff;
-        margin: 3px 0;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-    }
+        .create-button {
+            background-color: #FF0000;
+            color: white;
+        }
 
-    /* メニューの表示・非表示切り替え */
-    .my-menu {
-        position: fixed;
-        top: 60px;
-        right: 10px;
-        width: 200px;
-        background-color: #fff;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        display: none;
-        flex-direction: column;
-        z-index: 999;
-    }
+        .create-button:hover {
+            background-color: #C70039;
+            transform: scale(1.05);
+        }
 
-    .my-menu a {
-        text-decoration: none;
-        padding: 10px 15px;
-        color: #333;
-        border-bottom: 1px solid #ddd;
-        transition: background-color 0.3s;
-    }
+        /* ハンバーガーメニュー */
+        .hamburger-menu {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background-color: #333;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
 
-    .my-menu a:hover {
-        background-color: #f2f2f2;
-    }
+        .hamburger-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            margin: 3px 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
 
-    .my-menu a:last-child {
-        border-bottom: none;
-    }
+        .my-menu {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            width: 200px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+        }
 
-    /* メニューが開いた時 */
-    .my-menu.show {
-        display: flex;
-    }
+        .my-menu a {
+            text-decoration: none;
+            padding: 10px 15px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s;
+        }
+
+        .my-menu a:hover {
+            background-color: #f2f2f2;
+        }
+
+        .my-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .my-menu.show {
+            display: flex;
+        }
     </style>
 </head>
 <body>
@@ -197,13 +209,13 @@
     <a href="{% url 'create_meet' %}"><img src="{% static 'images/電話.png' %}" alt="電話"></a>
     <a href="{% url 'submit_report' %}"><img src="{% static 'images/通報.png' %}" alt="通報"></a>
 </div>
+
 <div class="hamburger-menu" id="hamburger-menu">
     <span></span>
     <span></span>
     <span></span>
 </div>
 
-<!-- マイメニュー -->
 <div class="my-menu" id="my-menu">
     <a href="{% url 'my_profile' %}">プロフィール</a>
     <a href="{% url 'my_keijiban' %}">掲示板</a>
@@ -211,7 +223,7 @@
     <a href="{% url 'favorite_list' %}">お気に入り</a>
     <a href="{% url 'logout' %}">ログアウト</a>
 </div>
-<!-- メインコンテンツ -->
+
 <div class="container">
     <div class="header">{{ board.title }}の参加者一覧</div>
     <div class="content-section">
@@ -224,12 +236,13 @@
             {% endfor %}
         </ul>
     </div>
-<div class="button-container">
-    <a href="{% url 'my_board_description' board.board_id %}" class="back-button">戻る</a>
+    <div class="button-container">
+        <a href="{% url 'my_board_description' board.board_id %}" class="back-button">戻る</a>
+        <a href="{% url 'create_keijibanchat_room' board.board_id %}" class="create-button">グループチャット作成</a>
+    </div>
 </div>
-</div>
+
 <script>
-         // ハンバーガーメニューのクリックイベント
     document.getElementById("hamburger-menu").addEventListener("click", () => {
         const menu = document.getElementById("my-menu");
         menu.classList.toggle("show");
