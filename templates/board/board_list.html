@@ -254,6 +254,46 @@
         .my-menu.show {
             display: flex;
         }
+        /* レスポンシブデザイン */
+    @media (max-width: 768px) {
+        body {
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .board-item {
+            font-size: 0.9em;
+        }
+
+        .create-board-button {
+            font-size: 0.9em;
+            padding: 8px 16px;
+        }
+
+        .search-form input[type="text"] {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .search-form button {
+            width: 100%;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        body {
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+        }
+        
+    }
     </style>
     <link rel="icon" href="/static/images/favicon.ico/favicon-96x96.png" type="image/png">
 </head>
