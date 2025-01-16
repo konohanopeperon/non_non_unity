@@ -84,7 +84,63 @@
            gap: 15px;
            margin-bottom: 15px;
        }
-   </style>
+       /* ハンバーガーメニュー */
+        .hamburger-menu {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background-color: #333;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .hamburger-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            margin: 3px 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* メニューの表示・非表示切り替え */
+        .my-menu {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            width: 200px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+        }
+        .my-menu a {
+            text-decoration: none;
+            padding: 10px 15px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s;
+        }
+        .my-menu a:hover {
+            background-color: #f2f2f2;
+        }
+        .my-menu a:last-child {
+            border-bottom: none;
+        }
+
+        /* メニューが開いた時 */
+        .my-menu.show {
+            display: flex;
+        }
+    </style>
+    <link rel="icon" href="/static/images/favicon.ico/favicon-96x96.png" type="image/png">
 </head>
 <body>
 <div class="hamburger-menu" id="hamburger-menu">
