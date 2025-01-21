@@ -346,15 +346,28 @@ def join_chat_room(request, room_id):
         return redirect('chat_room', room_id=room_id)
 
 
+from django.db.models import Q
+
+
 def chat_room(request, room_id):
     room = get_object_or_404(ChatRoom, room_id=room_id)
     messages = Message.objects.filter(room=room).order_by('timestamp')
-    available_users = User.objects.exclude(id__in=room.participants.values_list('id', flat=True)).filter(is_superuser=False)
+
+    # お気に入りユーザーのみフィルタリング
+    favorite_users = UserFavorite.objects.filter(user=request.user).values_list('favorite_user_id', flat=True)
+    available_users = User.objects.filter(id__in=favorite_users).exclude(
+        id__in=room.participants.values_list('id', flat=True)).filter(is_superuser=False)
+
     if request.method == 'POST' and 'content' in request.POST:
         content = request.POST.get('content')
         Message.objects.create(room=room, sender=request.user, content=content)
         return redirect('chat_room', room_id=room_id)
-    return render(request, 'chat/chat_room.html', {'room': room, 'messages': messages, 'available_users': available_users})
+
+    return render(request, 'chat/chat_room.html', {
+        'room': room,
+        'messages': messages,
+        'available_users': available_users
+    })
 
 def create_chat_room(request):
     if request.method == 'POST':

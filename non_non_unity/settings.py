@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-a%sv=h8&-&(50hsf(h@e9i=(43bt7h8(dv+g&&(k-3fbd^s!4k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['fuccer.f5.si']
 
 
 # Application definition
@@ -149,6 +149,10 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     'https://www.googleapis.com/auth/calendar.events',
     'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/userinfo.email',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://fuccer.f5.si'
 ]
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '104966677750-o7nbpejt3mckq6omegkk1llasp1llj67.apps.googleusercontent.com'
